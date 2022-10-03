@@ -1,16 +1,16 @@
 #include "config.h"
 
 
-uint32_t TFLP01_pm10sum 	= 0;
-uint32_t TFLP01_pm25sum 	= 0;
-uint32_t TFLP01_pm1sum 		= 0;
-int 	 dataTFLP01count 	= 0;
-bool 	 TFLP01_read 		= false;
-int 	 TFT_pm1			= 0;
-int 	 TFT_pm25			= 0;
-int 	 TFT_pm10			= 0;
-int 	 max_pm25			= 0;
-int 	 min_pm25			= 1000;
+uint32_t  TFLP01_pm10sum 	= 0;
+uint32_t  TFLP01_pm25sum 	= 0;
+uint32_t  TFLP01_pm1sum 	= 0;
+int 	  dataTFLP01count 	= 0;
+bool 	  TFLP01_read 		= false;
+uint32_t  TFT_pm1			= 0;
+uint32_t  TFT_pm25			= 0;
+uint32_t  TFT_pm10			= 0;
+uint32_t  max_pm25			= 0;
+uint32_t  min_pm25			= 1000;
 
 
 
@@ -55,7 +55,7 @@ void TFLP01_Init()
  */
 
 
-void TFLP01_GetData()
+void TFLP01_getData()
 {
 	uint8_t TFLP01data[17] = {0};
 	if (Serial2.available() > 0) 
@@ -83,23 +83,26 @@ void TFLP01_GetData()
 	if(TFLP01_read == true)
 	{
 		TFLP01_read = false;
-		TFT_pm1  = TFLP01data[9]+TFLP01data[10]*256+pm1CalibInt;
-		TFT_pm25 = TFLP01data[11]+TFLP01data[12]*256+pm25CalibInt;
-		TFT_pm10 = TFLP01data[13]+TFLP01data[14]*256+pm10CalibInt;
-		if(TFT_pm25!=255)
+		TFT_pm1 = TFLP01data[9] + TFLP01data[10] * 256 + pm1CalibInt;
+		TFT_pm25 = TFLP01data[11] + TFLP01data[12] * 256 + pm25CalibInt;
+		TFT_pm10 = TFLP01data[13] + TFLP01data[14] * 256 + pm10CalibInt;
+
+		if (TFT_pm25 != 255)
 		{
-			if(max_pm25 < TFT_pm25) max_pm25=TFT_pm25;
-			if(min_pm25 > TFT_pm25) min_pm25=TFT_pm25;
+			if (max_pm25 < TFT_pm25) max_pm25 = TFT_pm25;
+			if (min_pm25 > TFT_pm25) min_pm25 = TFT_pm25;
 		} 
+
 	#ifdef  DEBUG_SERIAL
 
-		for(uint8_t i=0; i<17; i++)
+		for (uint8_t i = 0; i < 17; i++)
 		{
-		Serial.print(i);
-		Serial.print(": ");
-		Serial.println(TFLP01data[i]);
+			Serial.print(i);
+			Serial.print(": ");
+			Serial.println(TFLP01data[i]);
 		}
-		Serial.println("Pm2.5:"+String(TFT_pm25)+" Pm10:"+String(TFT_pm10));
+
+		Serial.println("Pm2.5:" + String(TFT_pm25) + " Pm10:" + String(TFT_pm10));
 
 	#endif
 	}  

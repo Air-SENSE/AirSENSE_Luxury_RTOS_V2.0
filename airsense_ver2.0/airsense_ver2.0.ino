@@ -13,13 +13,6 @@
 #include <WiFiUdp.h>
 
 
-//======================  Khai bao thoi gian cho  ===================
-
-#define MQTT_Time_SendData		(uint32_t)10000
-#define WIFI_Time_Reconnect		(uint32_t)60000
-#define ButtonPress_Time 		(uint32_t)4000
-#define WIFI_MAX_CONNECT_TRIAL  (uint8_t)120
-
 //========================== Cac ham su dung ========================
 
 
@@ -67,14 +60,12 @@ void O3_GetData();
 
 //========================== 			Tasks		========================
 
-#define XDELAY ((TickType_t) 1000 / portTICK_PERIOD_MS)
-#define WIFI_xDelay ((TickType_t) WIFI_Time_Reconnect / portTICK_PERIOD_MS)
-#define MQTT_xDelay ((TickType_t) MQTT_Time_SendData / portTICK_PERIOD_MS)
-
-
-TaskHandle_t WIFI_handle = NULL;
-TaskHandle_t Screen_display_handle = NULL;
+TaskHandle_t WIFI_SmartConfig_Handle = NULL;
+TaskHandle_t Sensors_getData_Handle = NULL;
+TaskHandle_t Screen_Display_Handle = NULL;
 TaskHandle_t MQTT_SendData_Handle = NULL;
+TaskHandle_t SD_WriteData_Handle = NULL;
+
 
 void SmartConfig_Task(void * parameters)
 {
@@ -87,8 +78,8 @@ void SmartConfig_Task(void * parameters)
 			while (!WiFi.isSmartConfigDone() && wifi_ConnectTrialCount < WIFI_MAX_CONNECT_TRIAL)
 			{
 				Serial.println(".");
-				TFT_wifiStatus = 2;
-				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);
+				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;
+				myNex.writeNum("dl.wifi.val", TFT_WifiStatus);
 				wifi_ConnectTrialCount++;
 			}
 		}
@@ -101,19 +92,19 @@ void Wifi_Check_Status_Task(void *parameters)
 {
 	for(;;)
 	{
-		if (WiFi.status() == WL_CONNECTED)
+		if (WiFi.status() == wl_status_t::WL_CONNECTED)
 		{
-			TFT_wifiStatus = 1;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_CONNECTED;
 		}
 		else
 		{
-			TFT_wifiStatus = 0;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;
 		}
-		vTaskDelay(WIFI_xDelay);
+		vTaskDelay(WIFI_DELAY);
 	}
 }
 
-void GetData_Task(void *parameters)
+void Sensors_getData_Task(void *parameters)
 {
 	for(;;)
 	{
@@ -121,10 +112,10 @@ void GetData_Task(void *parameters)
 			O3_GetData();
 		#endif
 		
-		SHT_GetData();
-		TFLP01_GetData();
-		DS3231_GetData();
-		vTaskDelay(xDelay);
+		SHT_getData();
+		TFLP01_getData();
+		DS3231_getData();
+		vTaskDelay(TASK_DELAY);
 	}
 }
 
@@ -133,25 +124,29 @@ void Screen_Display_Task(void *parameters)
 	for(;;)
 	{
 		Screen_DisplayData();
-		vTaskDelay(xDelay);
+		vTaskDelay(TASK_DELAY);
 	}
 }
 
-void SendDatatoSD_MQTT_Task(void *parameters)
+void MQTT_sendData_Task(void *parameters)
+{
+	for (;;)
+	{
+		MQTT_PostData(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb);
+		mqttClient.loop();
+
+		vTaskDelay(MQTT_TASKDELAY);
+	}
+}
+
+void SD_writeData_Task(void *parameters)
 {
 	for(;;)
 	{
-		#ifdef USING_SD_CARD
-			SDcard_SaveDataFile(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, min_pm25, max_pm25);
-			runProgramWithSD();
-		#endif
+		SDcard_SaveDataFile(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, min_pm25, max_pm25);
+		runProgramWithSD();
 
-		#ifdef USING_MQTT
-			MQTT_PostData(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb);
-			mqttClient.loop();
-		#endif
-
-		vTaskDelay(MQTT_xDelay);
+		vTaskDelay(SD_TASKDELAY);
 	}
 }
 
@@ -161,59 +156,118 @@ void SendDatatoSD_MQTT_Task(void *parameters)
 
 void setup() {
 	myNex.NextionListen();
-	// Serial.begin(SERIAL_DEBUG_BAUDRATE);
-	pinMode(PIN_BUTTON_1,	INPUT);
+	Serial.begin(SERIAL_DEBUG_BAUDRATE);
+	pinMode(PIN_BUTTON_1, INPUT);
 	Wire.begin(PIN_SDA_GPIO, PIN_SCL_GPIO, I2C_CLOCK_SPEED);
 	WiFi.begin();
 	WiFi.macAddress(MacAddress1);
+
+
+	// khoi tao cac cam bien
+
+	Serial.println("Check Dusty Sensor.");
+	TFLP01_Init();
+	delay(10);
+
+	Serial.println("Check Temperature and Humidity Sensor.");
+	SHT_Init();
+	delay(10);
+
+	Serial.println("Check RTC Module.");
+	DS3231_Init();
+	delay(10);
+
+	Serial.println("Check Screen.");
+	Screen_Init();
+
+#ifdef O3_SENSOR
+	Serial.println("Check Ozone Sensor.");
+	O3_init();
+	delay(10);
+#endif
+
+///
 
 #ifdef USING_MQTT
 	MQTT_InitClient(topic, espID, mqttClient);
 	timeClient.begin();
 #endif
-	// khoi tao cac cam bien
-#ifdef O3_SENSOR
-	Serial.println("Check Ozone Sensor");
-	O3_init();
-	delay(10);
-#endif
 
-	// Serial.println("Check Dusty  Sensor");
-	// TFLP01_Init();
-	// delay(10);
-
-	// Serial.println("Check Temperature and Humidity Sensor");
-	// SHT_Init();
-	// delay(10);
-
-	// Serial.println("Check RTC Module");
-	// DS3231_Init();
-	// delay(10);
-
-	// Serial.println("Check Screen");
-	// Screen_Init();
-
+///
 
 #ifdef USING_SD_CARD
 	Serial.println("Check SD");
 	SDcard_Init();
 	delay(10);
-#endif
-
-#ifdef USING_SD_CARD
-	//   luu file text theo nam
 	sprintf(nameFileCalib, "/calib-%d.txt", yearCalib);
 #endif
 
+///
 	// core 0
-	xTaskCreatePinnedToCore(SmartConfig_Task, "Smart Config", 1000, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(Wifi_Check_Status_Task, "WIFI status", 1000, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(SendDatatoSD_MQTT_Task, "Send data", 1000, NULL, 1, NULL, 0);
+	xTaskCreatePinnedToCore(SmartConfig_Task,
+							"Smart Config",
+							STACK_SIZE,
+							NULL,
+							1,
+							&WIFI_SmartConfig_Handle,
+							0 			// core 0
+							);
+
+
+	xTaskCreatePinnedToCore(Wifi_Check_Status_Task,
+							"WIFI status",
+							STACK_SIZE,
+							NULL,
+							1,
+							NULL,
+							0 			// core 0
+							);
+	
+#ifdef USING_MQTT
+	xTaskCreatePinnedToCore(MQTT_sendData_Task,
+							"SenddatatoMQTT",
+							STACK_SIZE,
+							NULL,
+							1,
+							&MQTT_SendData_Handle,
+							0 			// core 0
+							);
+
+#endif
+
+#ifdef USING_SD_CARD
+	xTaskCreatePinnedToCore(SD_writeData_Task,
+							"WtitedatatoSD",
+							STACK_SIZE,
+							NULL,
+							1,
+							&SD_WriteData_Handle,
+							0			// core 0 
+							);
+
+#endif
+
 
 	// core 1
-	xTaskCreatePinnedToCore(GetData_Task, "Get Data", 1000, NULL, 1, NULL, 1);
-	xTaskCreatePinnedToCore(Screen_Display_Task, "Screen dislay", 1000, NULL, 1, NULL, 1);
-// viet tai lieu cho RTOS
+	xTaskCreatePinnedToCore(Sensors_getData_Task,
+							"SensorGetData",
+							STACK_SIZE,
+							NULL,
+							1,
+							&Sensors_getData_Handle,
+							1 			// core 1
+							);
+
+
+	xTaskCreatePinnedToCore(Screen_Display_Task,
+							"Screen dislay",
+							STACK_SIZE,
+							NULL,
+							1,
+							&Screen_Display_Handle,
+							1 			// core 1
+							);
+
 
 }
 

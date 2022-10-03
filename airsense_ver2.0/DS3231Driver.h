@@ -47,7 +47,7 @@ void DS3231_Init()
  *
  * @return  None
  */
-void DS3231_GetData()
+void DS3231_getData()
 {
 	DateTime now = rtc.now();
 	if(now.hour()<10 && now.minute()<10)

@@ -2,10 +2,10 @@
 #include "config.h"
 SHTSensor sht(SHTSensor::SHT3X);
 
-uint32_t lastReadSHT 	= 0;
-float 	 TFT_temp 		= 0;
-float 	 TFT_temp_F		= 0;
-float 	 TFT_humi 		= 0;
+uint32_t 	lastReadSHT 	= 0;
+uint32_t 	TFT_temp 		= 0;
+uint32_t 	TFT_temp_F		= 0;
+uint32_t 	TFT_humi 		= 0;
 
 
 /**
@@ -13,40 +13,43 @@ float 	 TFT_humi 		= 0;
  *
  * @return  None
  */
-void SHT_GetData()
+void SHT_getData()
 {
-	if ( (millis() - lastReadSHT > 5000) || (millis() < lastReadSHT))
+	if ( (millis() - lastReadSHT > 5000)
 	{
 		float SHT_temp = 0;
 		float SHT_humi = 0;
 #ifdef	DEBUG_SERIAL
-		Serial.print("teeeemp: ");
+		Serial.print("Temp: ");
 		Serial.println(tempCalibInt);
-		Serial.print("humiiiii: ");
+		Serial.print("Humi: ");
 		Serial.println(humiCalibInt);
 #endif
-	if (sht.readSample()) {
+		if (sht.readSample()) 
+		{
+			SHT_temp = sht.getTemperature() + tempCalibInt;
+			SHT_humi = sht.getHumidity() + humiCalibInt;
+#ifdef	DEBUG_SERIAL
+			Serial.println("T = "+String(SHT_temp)+"  "+"H = "+String(SHT_humi));
+#endif
+		} else 
+		{
+#ifdef	DEBUG_SERIAL
+			Serial.print("SHT85 Error in readSample()\n");   
+#endif
+		}
 
-	SHT_temp = sht.getTemperature()+ tempCalibInt;
-	SHT_humi = sht.getHumidity() + humiCalibInt;
-#ifdef	DEBUG_SERIAL
-	Serial.println("T = "+String(SHT_temp)+"  "+"H = "+String(SHT_humi));
-#endif
-	} else {
-#ifdef	DEBUG_SERIAL
-	Serial.print("SHT85 Error in readSample()\n");   
-#endif
+		if((SHT_temp > 0) && (SHT_humi > 0) && (SHT_temp < 100) && (SHT_humi < 100))
+		{
+			TFT_temp = (uint32_t)SHT_temp ;
+			TFT_humi = (uint32_t)SHT_humi ;
+			TFT_temp_F = (uint32_t)SHT_temp + 273;
+		} else
+		{
+			TFT_temp = 0;
+			TFT_humi = 0;     
+		}
 	}
-	if(SHT_temp>0 && SHT_humi>0 && SHT_temp<100 && SHT_humi<100){
-		TFT_temp = SHT_temp ;
-		TFT_humi = SHT_humi ;
-		TFT_temp_F = SHT_temp + 273;
-	}else{
-		TFT_temp = 0;
-		TFT_humi = 0;     
-	}
-	lastReadSHT = millis(); 
-}
 }
 
 /**
@@ -61,7 +64,7 @@ void SHT_Init(){
 #endif
 	} else {
 #ifdef	DEBUG_SERIAL
-	Serial.print("SHT init(): failed\n");
+		Serial.print("SHT init(): failed\n");
 #endif
 	}
 }

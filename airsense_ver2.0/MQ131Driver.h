@@ -17,7 +17,7 @@ void O3_Init()
 #ifdef	DEBUG_SERIAL
 	Serial.println("Calibration done!");
 	Serial.println("R0 = "+String(MQ131.getR0())+" Ohms");
-	Serial.println("Time to heat = "+String(MQ131.getTimeToRead())+" s");
+	Serial.println("Time to heat = "+String(MQ131.getTimeToRead())+"s");
 #endif
 }
 
@@ -29,18 +29,15 @@ void O3_Init()
  */
 void O3_GetData()
 {
-	if(((millis()-lastgetO3data) > 5000)
-	{
-		TFT_o3_ppb = random(30,46);
-		if(min_o3_ppb > TFT_o3_ppb ) min_o3_ppb = TFT_o3_ppb;
-		if(max_o3_ppb < TFT_o3_ppb ) max_o3_ppb = TFT_o3_ppb;
-		TFT_o3_ppm = TFT_o3_ppb/1000;
-		TFT_o3_ug  = TFT_o3_ppb*1.96;
-		min_o3_ug  = min_o3_ppb*1.96;
-		min_o3_ppm = min_o3_ppb/1000;
-		max_o3_ug  = max_o3_ppb*1.96;
-		max_o3_ppm = max_o3_ppb/1000;
-	}
+	TFT_o3_ppb = random(30,46);
+	if(min_o3_ppb > TFT_o3_ppb ) min_o3_ppb = TFT_o3_ppb;
+	if(max_o3_ppb < TFT_o3_ppb ) max_o3_ppb = TFT_o3_ppb;
+	TFT_o3_ppm = TFT_o3_ppb/1000;
+	TFT_o3_ug  = TFT_o3_ppb*1.96;
+	min_o3_ug  = min_o3_ppb*1.96;
+	min_o3_ppm = min_o3_ppb/1000;
+	max_o3_ug  = max_o3_ppb*1.96;
+	max_o3_ppm = max_o3_ppb/1000;
 }
 
 #endif

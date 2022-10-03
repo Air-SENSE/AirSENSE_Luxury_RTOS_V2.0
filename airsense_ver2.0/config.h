@@ -29,7 +29,7 @@
 #define PIN_NUM_MISO    21
 #define PIN_NUM_MOSI    19
 #define PIN_NUM_CLK     18
-#define PIN_CS_SD_CARD  5
+#define PIN_CS_SDCARD   5
 
 //========================== DEFINE CHO MAN HINH ========================
 
@@ -39,6 +39,7 @@
 //========================== DEFINE CHO MAN HINH ========================
 
 #define PIN_NEO_PIXEL   23
+
 //========================== DEFINE CHO MAN HINH ========================
 
 #define PIN_BUTTON_1    35
@@ -46,6 +47,7 @@
 #define outputA         33
 #define outputB         25
 #define switch          32
+
 //========================== DEFINE CHO MAN HINH ========================
 
 WiFiUDP ntpUDP;
@@ -58,27 +60,40 @@ uint32_t lastsenddatatoSD_MQTT = millis();
 
 //========================== khai bao cac bien hien thi tren man hinh ========================
 
-uint8_t  TFT_wifiStatus = 0;
-uint8_t  TFT_SDcard=0;
+typedef enum {
+    WIFI_DISCONNECT,
+    WIFI_CONNECTED,
+    WIFI_SCANNING
+} WIFI_Status_et;
+
+WIFI_Status_et TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;
+
+typedef enum  {
+    SD_DISCONNECT,
+    SD_CONNECTED
+} SD_Status_et;
+
+SD_Status_et  TFT_SDcard = SD_Status_et::SD_DISCONNECT;
 
 char  TFT_string[10];
 
-uint32_t  temp		  = 20;
-uint32_t  humi		  = 60;
-uint32_t  yearCalib   = 2021;
-uint32_t  TFT_o3_ppb  = 0;
-uint32_t  TFT_o3_ppm  = 0;
-uint32_t  TFT_o3_ug   = 0;
-uint32_t  min_o3_ppb  = 100;
-uint32_t  min_o3_ppm  = 100;
-uint32_t  min_o3_ug   = 100;
-uint32_t  max_o3_ppb  = 0;
-uint32_t  max_o3_ppm  = 0;
-uint32_t  max_o3_ug   = 0;
+uint32_t  temp		  =  20;
+uint32_t  humi		  =  60;
+uint32_t  yearCalib   =  2021;
+uint32_t  TFT_o3_ppb  =  0;
+uint32_t  TFT_o3_ppm  =  0;
+uint32_t  TFT_o3_ug   =  0;
+uint32_t  min_o3_ppb  =  100;
+uint32_t  min_o3_ppm  =  100;
+uint32_t  min_o3_ug   =  100;
+uint32_t  max_o3_ppb  =  0;
+uint32_t  max_o3_ppm  =  0;
+uint32_t  max_o3_ug   =  0;
 
 //========================== khai bao de dung cho the nho ========================
 
-bool  	stateSDcard	 = 0;
+
+
 uint8_t MacAddress1[6];
 char 	nameDevice1[12];
 
@@ -103,3 +118,21 @@ int pm10FromDisplay 	  = 0;
 int pm25FromDisplay 	  = 0;
 int tempFloatFromDisplay  = 0;
 int humiFloatFromDisplay  = 0;
+
+//==========================  DEFINE cho cac Task  ====================================
+
+
+#define TASK_DELAY ((TickType_t) 1000 / portTICK_PERIOD_MS)
+#define WIFI_TASKDELAY ((TickType_t) WIFI_TIME_RECONNECT / portTICK_PERIOD_MS)
+#define MQTT_TASKDELAY ((TickType_t) MQTT_TIME_SENDDATA / portTICK_PERIOD_MS)
+#define SD_TASKDELAY ((TickType_t) SD_TIME_WRITEDATA / portTICK_PERIOD_MS)
+#define STACK_SIZE 1024
+
+//==========================  Khai bao thoi gian   ====================================
+
+#define MQTT_TIME_SENDDATA		(uint32_t)10000
+#define SD_TIME_WRITEDATA		(uint32_t)10000
+#define WIFI_TIME_RECONNECT		(uint32_t)60000
+#define BUTTON_TIME_PRESSED 	(uint32_t)4000
+#define WIFI_MAX_CONNECT_TRIAL  (uint8_t)120
+

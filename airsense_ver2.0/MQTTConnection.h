@@ -45,7 +45,7 @@ void MQTT_InitClient(char* _topic, char* _espID, PubSubClient& _mqttClient)
  * @param	03 - 03
  * @return  None
  */
-void MQTT_PostData(uint32_t hum, uint32_t tem, int pm1, int pm25, int pm10, uint32_t O3)
+void MQTT_PostData(uint32_t hum, uint32_t tem, uint32_t pm1, uint32_t pm25, uint32_t pm10, uint32_t O3)
 {
 	if (WiFi.status() == WL_CONNECTED)
 	{
@@ -62,7 +62,7 @@ void MQTT_PostData(uint32_t hum, uint32_t tem, int pm1, int pm25, int pm10, uint
 			Serial.println(mes); 
 #endif
 			}
-			
+
 			mqttClient.loop();
 		}
 		else 

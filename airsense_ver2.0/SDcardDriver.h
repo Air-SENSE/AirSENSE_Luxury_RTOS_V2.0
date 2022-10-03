@@ -137,16 +137,16 @@ void SDcard_ReadFile()
  * @param	maxpm25 - muc max cua pm25
  * @return  None
  */
-void SDcard_SaveDataFile(float hum,float tem,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int minpm25, int maxpm25)
+void SDcard_SaveDataFile(uint32_t hum, uint32_t tem, int pm1, int pm25, int pm10, int O3ppb, uint32_t O3ppm, uint32_t O3ug , int minpm25, int maxpm25)
 {
     DateTime now = rtc.now();
-    int getyear =now.year();
-    uint8_t getmonth =now.month();
-    uint8_t getday =now.day();
-    uint8_t gethour =now.hour();
-    uint8_t getminute =now.minute();
-    uint8_t getsecond =now.second();
-    uint32_t epochTime=now.unixtime();
+    int getyear = now.year();
+    uint8_t getmonth = now.month();
+    uint8_t getday = now.day();
+    uint8_t gethour = now.hour();
+    uint8_t getminute = now.minute();
+    uint8_t getsecond = now.second();
+    uint32_t epochTime= now.unixtime();
     uint8_t y = getyear%2000;
     
     char filename[16];

@@ -18,6 +18,7 @@
 #define MQTT_Time_SendData		(uint32_t)10000
 #define WIFI_Time_Reconnect		(uint32_t)60000
 #define ButtonPress_Time 		(uint32_t)4000
+#define WIFI_MAX_CONNECT_TRIAL  (uint8_t)120
 
 //========================== Cac ham su dung ========================
 
@@ -26,10 +27,10 @@ void DS3231_Init();
 void DS3231_GetData();
 
 void MQTT_InitClient(char* _topic, char* _espID, PubSubClient& _mqttClient);
-void MQTT_PostData(float hum,float tem,int pm1,int pm25,int pm10,float O3);
+void MQTT_PostData(uint32_t, uint32_t, int, int, int, uint32_t);
 
 void SDcard_Init();
-void SDcard_GetData(float hum,float tem,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int minpm25, int maxpm25);
+void SDcard_GetData(uint32_t, uint32_t, int, int, int, int, uint32_t, uint32_t , int, int);
 void SDcardScreen_SplitStringData();
 void SDcard_ReadFile();
 void SDcard_SaveDataFile();
@@ -50,8 +51,6 @@ void Screen_DisplayCalibData();
 void O3_Init();
 void O3_GetData();
 
-bool isLongPressButton();
-
 
 //========================== Khai bao cac file code ========================
 
@@ -63,11 +62,12 @@ bool isLongPressButton();
 #include "./SDcardDriver.h"
 #include "./MQ131Driver.h"
 #include "./NextionDriver.h"
+#include "./ButtonDriver.h"
 
 
 //========================== 			Tasks		========================
 
-#define xDelay ((TickType_t) 1000 / portTICK_PERIOD_MS)
+#define XDELAY ((TickType_t) 1000 / portTICK_PERIOD_MS)
 #define WIFI_xDelay ((TickType_t) WIFI_Time_Reconnect / portTICK_PERIOD_MS)
 #define MQTT_xDelay ((TickType_t) MQTT_Time_SendData / portTICK_PERIOD_MS)
 
@@ -81,18 +81,18 @@ void SmartConfig_Task(void * parameters)
 	// check button de smartConfig
 	for(;;)
 	{
-		if (isLongPressButton())
+		if (Button_isLongPressed())
 		{
-			uint8_t count = 0;
-			while (!WiFi.smartConfigDone() && count < 120)
+			uint8_t wifi_ConnectTrialCount = 0;
+			while (!WiFi.isSmartConfigDone() && wifi_ConnectTrialCount < WIFI_MAX_CONNECT_TRIAL)
 			{
 				Serial.println(".");
-				TFT_wifi = 2;
-				myNex.writeNum("dl.wifi.val",TFT_wifi);
-				count++;
+				TFT_wifiStatus = 2;
+				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);
+				wifi_ConnectTrialCount++;
 			}
 		}
-		vTaskDelay(xDelay);
+		vTaskDelay(XDELAY);
 	}
 }
 
@@ -103,11 +103,11 @@ void Wifi_Check_Status_Task(void *parameters)
 	{
 		if (WiFi.status() == WL_CONNECTED)
 		{
-			TFT_wifi = 1;
+			TFT_wifiStatus = 1;
 		}
 		else
 		{
-			TFT_wifi = 0;
+			TFT_wifiStatus = 0;
 		}
 		vTaskDelay(WIFI_xDelay);
 	}
@@ -147,7 +147,7 @@ void SendDatatoSD_MQTT_Task(void *parameters)
 		#endif
 
 		#ifdef USING_MQTT
-			MQTT_PostData(TFT_humi,TFT_temp,TFT_pm1,TFT_pm25,TFT_pm10,TFT_o3_ppb);
+			MQTT_PostData(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb);
 			mqttClient.loop();
 		#endif
 
@@ -221,18 +221,5 @@ void setup() {
 
 void loop()
 {
-
-}
-
-bool isLongPressButton()
-{
-	if (millis() - lastPressButton > LongTimePressButton && digitalRead(PIN_BUTTON_1) == 0)
-	{
-		return true;
-	}
-	else if (digitalRead(PIN_BUTTON_1) == 1)
-	{
-		lastPressButton = millis();
-	}
-	return false;
+	// nothing
 }

@@ -1,5 +1,5 @@
 /************************************************************
- **    TFT_o3_ppb(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
+**    TFT_o3_ppb(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
 **    min_o3_ppb(int)  min_o3_ppm(float)  min_o3_ug(int)  **
 **    max_o3_ppb(int)  max_o3_ppm(float)  max_o3_ug(int)  **
 **    TFT_temp(uint8_t)            TFT_wifi               **
@@ -8,7 +8,7 @@
 **    TFT_pm25(int)                Tx: pin 25             **
 **    TFT_pm10(int)                                       **
 **    TFT_time(string)                                    **
-************************************************************/
+*************************************************************/
 
 /* Khai bao thu vien man hinh TFT */
 #pragma once 
@@ -31,7 +31,7 @@ EasyNex myNex(Serial);
 void Screen_Init()
 {
 	myNex.begin(SERIAL_DEBUG_BAUDRATE);
-	EEPROM.begin(512);
+	EEPROM.begin(EEPROM_SIZE);
 }
 
 
@@ -43,33 +43,35 @@ void Screen_Init()
 void Screen_GetDisplayData()
 {
 	// cac bien de test
-	int lastnumber = 0;
+	int lastnumber  = 0;
 	int lastnumber1 = 0;
 	int lastnumber2 = 0;
 	int lastnumber3 = 0;
 	int lastnumber4 = 0;
 	int lastnumber5 = 0;
-	int lastnumber6 = 0;  
+	int lastnumber6 = 0; 
+
 	// cac bien doc gia tri calib tu man hinh
 	int number10 = myNex.readNumber("calibEdit.n8.val");  
-	int number = myNex.readNumber("calibEdit.n0.val"); 
-	int number1 = myNex.readNumber("calibEdit.n1.val");  
-	int number2 = myNex.readNumber("calibEdit.n2.val");
-	int number3 = myNex.readNumber("calibEdit.n3.val");  
-	int number4 = myNex.readNumber("calibEdit.n4.val");
-	int number5 = myNex.readNumber("calibEdit.n5.val");  
-	int number6 = myNex.readNumber("calibEdit.n6.val");
+	int number   = myNex.readNumber("calibEdit.n0.val"); 
+	int number1  = myNex.readNumber("calibEdit.n1.val");  
+	int number2  = myNex.readNumber("calibEdit.n2.val");
+	int number3  = myNex.readNumber("calibEdit.n3.val");  
+	int number4  = myNex.readNumber("calibEdit.n4.val");
+	int number5  = myNex.readNumber("calibEdit.n5.val");  
+	int number6  = myNex.readNumber("calibEdit.n6.val");
 
 	// kiem tra loi
-	if(number != ERROR_READ_DISPLAY){                     
+	if(number != ERROR_READ_DISPLAY)
+	{                     
 		lastnumber = number;  
-		if(lastnumber !=0)                                     
+		if(lastnumber != 0)                                     
 		{
 			tempFromDisplay = lastnumber;
 		}
-	}
-										
-	else if(number == ERROR_READ_DISPLAY){
+	}										
+	else if(number == ERROR_READ_DISPLAY)
+	{
 		number = lastnumber;
 	}
 
@@ -77,13 +79,13 @@ void Screen_GetDisplayData()
 	if(number1 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber1 = number1;  
-		if(lastnumber1 !=0)                                     
+		if(lastnumber1 != 0)                                     
 		{
 			humiFromDisplay = lastnumber1;
 		}
-	}
-										
-	else if(number1 == ERROR_READ_DISPLAY){
+	}									
+	else if(number1 == ERROR_READ_DISPLAY)
+	{
 		number1 = lastnumber1;
 	}
 
@@ -92,12 +94,11 @@ void Screen_GetDisplayData()
 	if(number2 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber2 = number2;  
-		if(lastnumber2 !=0)                                     
+		if(lastnumber2 != 0)                                     
 		{
 			pm1FromDisplay = lastnumber2;
 		}
-	}
-										
+	}									
 	else if(number2 == ERROR_READ_DISPLAY)
 	{
 		number2 = lastnumber2;
@@ -107,12 +108,11 @@ void Screen_GetDisplayData()
 	if(number3 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber3 = number3;  
-		if(lastnumber3 !=0)                                     
+		if(lastnumber3 != 0)                                     
 		{
 			pm10FromDisplay = lastnumber3;
 		}
-	}
-										
+	}									
 	else if(number3 == ERROR_READ_DISPLAY)
 	{
 		number3 = lastnumber3;
@@ -121,12 +121,11 @@ void Screen_GetDisplayData()
 	if(number4 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber4 = number4;  
-		if(lastnumber4 !=0)                                     
+		if(lastnumber4 != 0)                                     
 		{
 			pm25FromDisplay = lastnumber4;
 		}
-	}
-										
+	}										
 	else if(number4 == ERROR_READ_DISPLAY)
 	{
 		number4 = lastnumber4;
@@ -135,12 +134,11 @@ void Screen_GetDisplayData()
 	if(number5 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber5 = number5;  
-		if(lastnumber5 !=0)                                     
+		if(lastnumber5 !=  0)                                     
 		{
 			tempFloatFromDisplay = lastnumber5;
 		}
-	}
-										
+	}										
 	else if(number5 == ERROR_READ_DISPLAY)
 	{
 	number5 = lastnumber5;
@@ -149,7 +147,7 @@ void Screen_GetDisplayData()
 	if(number6 != ERROR_READ_DISPLAY)
 	{                     
 		lastnumber6 = number6;  
-		if(lastnumber6 !=0)                                     
+		if(lastnumber6 != 0)                                     
 		{
 			humiFloatFromDisplay = lastnumber6;
 		}
@@ -158,6 +156,7 @@ void Screen_GetDisplayData()
 	{
 		number6 = lastnumber6;
 	}
+
 #ifdef DEBUG_SERIAL
 	Serial.println(tempFromDisplay); 
 	Serial.println(humiFromDisplay);
@@ -235,7 +234,7 @@ void Screen_DisplayCalibData(){
  */
 void Screen_DisplayData()
 {
-	myNex.writeNum("dl.wifi.val",TFT_wifi);
+	myNex.writeNum("dl.wifi.val",TFT_wifiStatus);
 	myNex.writeNum("dl.sd.val",TFT_SDcard);
 
 	myNex.writeStr("dl.time.txt",TFT_time);

@@ -12,14 +12,16 @@ char  TFT_time[16];
  * @return  None
  */
 void DS3231_Init()
-{
+{ 
 	rtc.begin();
-	if (WiFi.status() == WL_CONNECTED){
-		if (Ping.ping(remote_host)){
-		timeClient.update();
-		uint32_t epochTime = timeClient.getEpochTime();
-		rtc.adjust(DateTime(epochTime));
-		Serial.println("updatetimeDS3231");
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		if (Ping.ping(remote_host))
+		{
+			timeClient.update();
+			uint32_t epochTime = timeClient.getEpochTime();
+			rtc.adjust(DateTime(epochTime));
+			Serial.println("updatetimeDS3231");
 		}
 	}
 	DateTime now = rtc.now();
@@ -48,16 +50,23 @@ void DS3231_Init()
 void DS3231_GetData()
 {
 	DateTime now = rtc.now();
-	if(now.hour()<10 && now.minute()<10){
+	if(now.hour()<10 && now.minute()<10)
+	{
 		sprintf(TFT_time,"0%d:0%d  %d/%d/%d",int(now.hour()),int(now.minute()),int(now.day()),int(now.month()),int(now.year()%2000));
 	}
-	if(now.hour()>=10 && now.minute()<10){
+
+	if(now.hour()>=10 && now.minute()<10)
+	{
 		sprintf(TFT_time,"%d:0%d  %d/%d/%d",int(now.hour()),int(now.minute()),int(now.day()),int(now.month()),int(now.year()%2000));
 	} 
-	if(now.hour()<10 && now.minute()>=10){
+
+	if(now.hour()<10 && now.minute()>=10)
+	{
 		sprintf(TFT_time,"0%d:%d  %d/%d/%d",int(now.hour()),int(now.minute()),int(now.day()),int(now.month()),int(now.year()%2000));
 	} 
-	if(now.hour()>=10 && now.minute()>=10){
+
+	if(now.hour()>=10 && now.minute()>=10)
+	{
 		sprintf(TFT_time,"%d:%d  %d/%d/%d",int(now.hour()),int(now.minute()),int(now.day()),int(now.month()),int(now.year()%2000));
 	} 
 	

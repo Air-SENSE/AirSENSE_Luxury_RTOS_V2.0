@@ -23,16 +23,16 @@ uint32_t lastSenddatatoMQTT = millis();
  */
 void MQTT_InitClient(char* _topic, char* _espID, PubSubClient& _mqttClient)
 {
-  uint8_t espMacAddress[6];
-  WiFi.macAddress(espMacAddress);
-  uint32_t macAddressDecimal = (espMacAddress[3] << 16) + (espMacAddress[4] << 8) + espMacAddress[5];
-  sprintf(_topic, "/AirSENSE v3_luxury/ESP32_%08d/", macAddressDecimal);
-  sprintf(_espID, "%08d", macAddressDecimal);
-  _mqttClient.setServer(mqttServerAddress, mqttServerPort);
-  _mqttClient.connect(_espID);
-  Serial.println(_topic);
-  Serial.println(_espID);
-  mqttClient.connect(espID);
+	uint8_t espMacAddress[6];
+	WiFi.macAddress(espMacAddress);
+	uint32_t macAddressDecimal = (espMacAddress[3] << 16) + (espMacAddress[4] << 8) + espMacAddress[5];
+	sprintf(_topic, "/AirSENSE v3_luxury/ESP32_%08d/", macAddressDecimal);
+	sprintf(_espID, "%08d", macAddressDecimal);
+	_mqttClient.setServer(mqttServerAddress, mqttServerPort);
+	_mqttClient.connect(_espID);
+	Serial.println(_topic);
+	Serial.println(_espID);
+	mqttClient.connect(espID);
 }
 
 /**
@@ -45,31 +45,33 @@ void MQTT_InitClient(char* _topic, char* _espID, PubSubClient& _mqttClient)
  * @param	03 - 03
  * @return  None
  */
-void MQTT_PostData(float hum,float tem,int pm1,int pm25,int pm10,float O3)
+void MQTT_PostData(uint32_t hum, uint32_t tem, int pm1, int pm25, int pm10, uint32_t O3)
 {
-    if (WiFi.status() == WL_CONNECTED)
-    {
-       if (mqttClient.connected())
-       {
-         timeClient.update();
-         uint32_t epochTime = timeClient.getEpochTime();   
-         char mes[256] = {0};
-         sprintf(mes, "{\"DATA\":{\"O3\":\%.1f\,\"Hum\":\%.1f\,\"Pm1\":\%d\,\"Pm10\":\%d\,\"Pm2p5\":\%d\,\"Time\":\%d\,\"Tem\":\%.1f\},\"NodeID\":\"%s\"}",O3,hum,pm1,pm10,pm25,epochTime,tem,nameDevice1);
-         if (mqttClient.publish(topic, mes, true))
-         {
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		if (mqttClient.connected())
+		{
+			timeClient.update();
+			uint32_t epochTime = timeClient.getEpochTime();   
+			char mes[256] = {0};
+			sprintf(mes, "{\"DATA\":{\"O3\":\%.1f\,\"Hum\":\%.1f\,\"Pm1\":\%d\,\"Pm10\":\%d\,\"Pm2p5\":\%d\,\"Time\":\%d\,\"Tem\":\%.1f\},\"NodeID\":\"%s\"}",O3,hum,pm1,pm10,pm25,epochTime,tem,nameDevice1);
+			
+			if (mqttClient.publish(topic, mes, true))
+			{
 #ifdef	DEBUG_SERIAL
-           Serial.println(mes); 
+			Serial.println(mes); 
 #endif
-         }
-         mqttClient.loop();
-       }
-       else 
-       {
-		    mqttClient.connect(espID);
+			}
+			
+			mqttClient.loop();
+		}
+		else 
+		{
+			mqttClient.connect(espID);
 #ifdef	DEBUG_SERIAL
-        Serial.println(" - mqtt reconnect ");
-        mqttClient.subscribe("huuhuong");
+			Serial.println(" - mqtt reconnect ");
+			mqttClient.subscribe("huuhuong");
 #endif
-       }
-     }
+		}
+	}
 }

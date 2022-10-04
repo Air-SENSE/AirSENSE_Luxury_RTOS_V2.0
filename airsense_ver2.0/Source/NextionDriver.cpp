@@ -8,7 +8,7 @@
  */
 void Screen_Init()
 {
-	myNex.begin(SERIAL_DEBUG_BAUDRATE);
+	myNex.begin(NEXTION_BAUDRATE);
 	EEPROM.begin(EEPROM_SIZE);
 }
 

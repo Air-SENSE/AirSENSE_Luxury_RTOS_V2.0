@@ -20,6 +20,7 @@
 #include <sstream>
 #include "config.h"
 #include "EasyNextionLibrary.h"
+#include "Easy_Nextion_Library/src/EasyNextionLibrary.h"
 #include <EEPROM.h>
 
 

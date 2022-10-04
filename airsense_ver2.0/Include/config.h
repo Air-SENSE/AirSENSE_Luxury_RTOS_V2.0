@@ -10,8 +10,10 @@
 #define O3_SENSOR_MQ131
 
 //========================== DEFINE CHO MAN HINH ========================
-#define SERIAL_DEBUG_BAUDRATE  115200
-#define ERROR_READ_DISPLAY     777777
+#define SERIAL_DEBUG_BAUDRATE   115200
+#define ERROR_READ_DISPLAY      777777
+#define NEXTION_BAUDRATE        9600
+#define EEPROM_SIZE             512
 
 //========================== DEFINE CHO MAN HINH ========================
 

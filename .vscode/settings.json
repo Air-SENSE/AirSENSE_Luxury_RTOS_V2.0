@@ -4,6 +4,17 @@
         "initializer_list": "cpp",
         "xstring": "cpp",
         "xutility": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "sstream": "cpp",
+        "iostream": "cpp",
+        "array": "cpp",
+        "chrono": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "regex": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp"
     }
 }

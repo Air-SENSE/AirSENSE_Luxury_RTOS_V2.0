@@ -4,6 +4,8 @@
 
 #ifdef PIN_BUTTON_1 || PIN_BUTTON_2
 
+#include "config.h"
+
 #define BUTTON_PRESS_DURATION	(uint32_t)4000 	// millisecond
 
 uint32_t lastPressButton = 0;

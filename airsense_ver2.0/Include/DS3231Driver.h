@@ -5,12 +5,12 @@
 #include "RTClib.h"
 #include <ESP32Ping.h>
 
-const char* remote_host = "www.google.com";
+const char* remote_host_string = "www.google.com";
 RTC_DS3231 rtc;
-char  TFT_time[16];
+char  TFT_time_string[16];
 
 
-void DS3231_Init();
+void DS3231_init();
 void DS3231_getData();
 
 

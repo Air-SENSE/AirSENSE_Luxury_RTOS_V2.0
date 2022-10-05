@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\airsense_ver2.0"
+    "\\airsense_ver2.0",
+    "\\airsense_ver2.0\\Include"
   ],
+  "SelectedNode": "\\airsense_ver2.0\\Include\\SHT85Driver.h",
   "PreviewInSolutionExplorer": false
 }

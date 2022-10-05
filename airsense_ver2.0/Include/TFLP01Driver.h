@@ -14,12 +14,12 @@ bool 	  TFLP01_read 		= false;
 uint32_t  TFT_pm1			= 0;
 uint32_t  TFT_pm25			= 0;
 uint32_t  TFT_pm10			= 0;
-uint32_t  max_pm25			= 0;
-uint32_t  min_pm25			= 1000;
+uint32_t  pm25_max			= 0;
+uint32_t  pm25_min			= 1000;
 
 
 uint16_t crc16_modbus(uint8_t * , uint16_t);
-void TFLP01_Init();
+void TFLP01_init();
 void TFLP01_getData();
 
 

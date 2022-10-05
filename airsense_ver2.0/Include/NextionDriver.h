@@ -19,7 +19,6 @@
 #include "string.h"
 #include <sstream>
 #include "config.h"
-#include "EasyNextionLibrary.h"
 #include "Easy_Nextion_Library/src/EasyNextionLibrary.h"
 #include <EEPROM.h>
 
@@ -27,11 +26,11 @@
 EasyNex myNex(Serial);
 
 
-void Screen_Init();
-void Screen_GetDisplayData();
-void Screen_SaveCalibData2SDcard();
-void Screen_DisplayCalibData();
-void Screen_DisplayData();
+void Screen_init();
+void Screen_getDisplayData();
+void Screen_saveCalibData2SDcard();
+void Screen_displayCalibData();
+void Screen_displayData();
 
 
 #endif

@@ -16,33 +16,33 @@
 
 //========================== Cac ham su dung ========================
 
-void DS3231_Init();
-void DS3231_GetData();
+void DS3231_init();
+void DS3231_getData();
 
-void MQTT_InitClient(char* _topic, char* _espID, PubSubClient& _mqttClient);
-void MQTT_PostData(uint32_t, uint32_t, int, int, int, uint32_t);
+void MQTT_initClient(char* _topic, char* _espID, PubSubClient& _mqttClient);
+void MQTT_postData(uint32_t, uint32_t, int, int, int, uint32_t);
 
-void SDcard_Init();
-void SDcard_GetData(uint32_t, uint32_t, int, int, int, int, uint32_t, uint32_t , int, int);
+void SDcard_init();
+void SDcard_getData(uint32_t, uint32_t, int, int, int, int, uint32_t, uint32_t , int, int);
 void SDcardScreen_SplitStringData();
-void SDcard_ReadFile();
-void SDcard_SaveDataFile();
+void SDcard_readFile();
+void SDcard_saveDataFile(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
 void runProgramWithSD();
 
-void SHT_GetData();
-void SHT_Init();
+void SHT_getData();
+void SHT_init();
 
-void TFLP01_GetData();
-void TFLP01_Init();
+void TFLP01_getData();
+void TFLP01_init();
 
-void Screen_Init();
-void Screen_SaveCalibData2SDcard();
-void Screen_GetDisplayData();
-void Screen_DisplayData();
-void Screen_DisplayCalibData();
+void Screen_init();
+void Screen_saveCalibData2SDcard();
+void Screen_getDisplayData();
+void Screen_displayData();
+void Screen_displayCalibData();
 
-void O3_Init();
-void O3_GetData();
+void O3_init();
+void O3_getData();
 
 
 //========================== Khai bao cac file code ========================
@@ -63,7 +63,7 @@ void O3_GetData();
 
 TaskHandle_t WIFI_SmartConfig_Handle = NULL;
 TaskHandle_t Sensors_getData_Handle = NULL;
-TaskHandle_t Screen_Display_Handle = NULL;
+TaskHandle_t Screen_display_Handle = NULL;
 TaskHandle_t MQTT_sendData_Handle = NULL;
 TaskHandle_t SD_writeData_Handle = NULL;
 
@@ -75,8 +75,8 @@ void SmartConfig_Task(void * parameters)
 	{
 		if (Button_isLongPressed())
 		{
-			uint8_t wifi_ConnectTrialCount_u8 = 0;
-			while (!WiFi.isSmartConfigDone() && wifi_ConnectTrialCount < WIFI_MAX_CONNECT_TRIAL)
+			uint8_t wifi_connectTrialCount_u8 = 0;
+			while (!WiFi.isSmartConfigDone() && wifi_connectTrialCount < WIFI_MAX_CONNECT_TRIAL)
 			{
 				Serial.println(".");
 				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;
@@ -120,11 +120,11 @@ void Sensors_getData_Task(void *parameters)
 	}
 }
 
-void Screen_Display_Task(void *parameters) 
+void Screen_display_Task(void *parameters) 
 {
 	for(;;)
 	{
-		Screen_DisplayData();
+		Screen_displayData();
 		vTaskDelay(TASK_DELAY);
 	}
 }
@@ -133,10 +133,10 @@ void MQTT_sendData_Task(void *parameters)
 {
 	for (;;)
 	{
-		MQTT_PostData(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb);
+		MQTT_postData(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb);
 		mqttClient.loop();
 
-		vTaskDelay(MQTT_TASKDELAY);
+		vTaskDelay(MQTT_TASK_DELAY);
 	}
 }
 
@@ -144,10 +144,10 @@ void SD_writeData_Task(void *parameters)
 {
 	for(;;)
 	{
-		SDcard_SaveDataFile(TFT_humi, TFT_temp, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, min_pm25, max_pm25);
+		SDcard_SaveDataFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1, TFT_pm25, TFT_pm10, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, pm25_min, pm25_max);
 		runProgramWithSD();
 
-		vTaskDelay(SD_TASKDELAY);
+		vTaskDelay(SD_TASK_DELAY);
 	}
 }
 
@@ -200,7 +200,7 @@ void setup() {
 	Serial.println("Check SD");
 	SDcard_Init();
 	delay(10);
-	sprintf(nameFileCalib, "/calib-%d.txt", yearCalib);
+	sprintf(nameFileCalib, "/calib-%d.txt", yearCalib_u32);
 #endif
 
 ///
@@ -215,7 +215,7 @@ void setup() {
 							);
 
 
-	xTaskCreatePinnedToCore(Wifi_Check_Status_Task,
+	xTaskCreatePinnedToCore(Wifi_checkStatus_Task,
 							"wifi status",
 							STACK_SIZE,
 							NULL,
@@ -261,7 +261,7 @@ void setup() {
 							);
 
 
-	xTaskCreatePinnedToCore(Screen_Display_Task,
+	xTaskCreatePinnedToCore(Screen_display_Task,
 							"Screen dislay",
 							STACK_SIZE,
 							NULL,

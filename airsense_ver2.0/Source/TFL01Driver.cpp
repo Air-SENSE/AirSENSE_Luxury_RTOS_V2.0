@@ -1,4 +1,4 @@
-#include <TFLP01Driver.h>
+#include <airsense_ver2.0/Include/TFLP01Driver.h>
 
 
 /**
@@ -16,9 +16,8 @@ uint16_t crc16_modbus(uint8_t *modbusdata , uint16_t Length)
 		crc16 ^= modbusdata[i];
 		for (j = 0; j < 8; j++)
 		{
-		if ((crc16 & 0x01) == 1) crc16 = (crc16 >> 1) ^ 0xA001; 
-		else
-		crc16 >>= 1;
+			if ((crc16 & 0x01) == 1) 	crc16 = (crc16 >> 1) ^ 0xA001; 
+			else	crc16 >>= 1;
 		}
 	}
 	return crc16;
@@ -29,7 +28,7 @@ uint16_t crc16_modbus(uint8_t *modbusdata , uint16_t Length)
  *
  * @return  None
  */
-void TFLP01_Init()
+void TFLP01_init()
 {
 	Serial2.begin(115200);
 }

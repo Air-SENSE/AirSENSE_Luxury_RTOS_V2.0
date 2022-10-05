@@ -1,11 +1,11 @@
-#include <DFRobotO3.h>
+#include <airsense_ver2.0/Include/DFRobotO3.h>
 
 /**
  * @brief	Khoi tao module Ozone
  *
  * @return  None
  */
-void O3_Init()
+void O3_init()
 {
     if(!Ozone.begin(Ozone_IICAddress)) 
     {
@@ -26,9 +26,9 @@ void O3_Init()
  *
  * @return  None
  */
-void O3_GetData()
+void O3_getData()
 {
-    if((millis()-lastgetO3data>5000) || (millis()<lastgetO3data))
+    if((millis() - lastgetO3data > O3_GETDATA_PERIOD))
     {
         TFT_o3_ppb = Ozone.ReadOzoneData(COLLECT_NUMBER);
         if(min_o3_ppb > TFT_o3_ppb ) min_o3_ppb = TFT_o3_ppb;

@@ -1,11 +1,11 @@
-#include <SDcardDriver.h>
+#include <airsense_ver2.0/Include/SDcardDriver.h>
 
 /**
  * @brief	ham de khoi tao the nho
  *
  * @return  None
  */ 
-void SDcard_Init()
+void SDcard_init()
 {
     SPI.begin(PIN_NUM_CLK, PIN_NUM_MISO, PIN_NUM_MOSI, PIN_CS_SDCARD);
     pinMode(SS, OUTPUT);
@@ -29,7 +29,7 @@ void SDcard_Init()
  *
  * @return  None
  */
-void Screen_SplitStringData()
+void Screen_splitStringData()
 {
 #ifdef DEBUG_SERIAL
 	Serial.print("Char_arr in split: "); 
@@ -99,7 +99,7 @@ char humiFl[30] = "";
  *
  * @return  None
  */
-void SDcard_ReadFile() 
+void SDcard_readFile() 
 {
 myFile3 = SD.open(nameFileCalib, FILE_READ);
 String finalString = "";
@@ -132,7 +132,7 @@ while (myFile3.available())
  * @param	pm25_max - muc max cua pm25
  * @return  None
  */
-void SDcard_SaveDataFile(uint32_t hum, uint32_t tem, uint32_t pm1, uint32_t pm25, uint32_t pm10, uint32_t O3ppb, uint32_t O3ppm, uint32_t O3ug , uint32_t pm25_min, uint32_t pm25_max)
+void SDcard_saveDataFile(uint32_t hum, uint32_t tem, uint32_t pm1, uint32_t pm25, uint32_t pm10, uint32_t O3ppb, uint32_t O3ppm, uint32_t O3ug , uint32_t pm25_min, uint32_t pm25_max)
 {
 	DateTime now = rtc.now();
 	int getyear = now.year();

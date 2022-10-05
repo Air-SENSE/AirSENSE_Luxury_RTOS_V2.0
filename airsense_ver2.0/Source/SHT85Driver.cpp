@@ -1,4 +1,4 @@
-#include <SHT85Driver.h>
+#include <airsense_ver2.0/Include/SHT85Driver.h>
 
 
 /**
@@ -6,7 +6,7 @@
  *
  * @return  None
  */
-void SHT_Init()
+void SHT_init()
 {
 	if (sht.init())
     {
@@ -28,20 +28,22 @@ void SHT_Init()
  */
 void SHT_getData()
 {
-	if ( (millis() - lastReadSHT > 5000)
+	if ( (millis() - lastReadSHT_u32 > SHT85_GETDATA_PEROID)
 	{
-		float SHT_temp = 0;
-		float SHT_humi = 0;
+		float SHT_temperature = 0;
+		float SHT_humidity = 0;
+
 #ifdef	DEBUG_SERIAL
 		Serial.print("Temp: ");
 		Serial.println(tempCalibInt);
 		Serial.print("Humi: ");
 		Serial.println(humiCalibInt);
 #endif
+
 		if (sht.readSample()) 
 		{
-			SHT_temp = sht.getTemperature() + tempCalibInt;
-			SHT_humi = sht.getHumidity() + humiCalibInt;
+			SHT_temperature = sht.getTemperature() + tempCalibInt;
+			SHT_humidity = sht.getHumidity() + humiCalibInt;
 #ifdef	DEBUG_SERIAL
 			Serial.println("T = "+String(SHT_temp)+"  "+"H = "+String(SHT_humi));
 #endif
@@ -52,16 +54,17 @@ void SHT_getData()
 #endif
 		}
 
-		if((SHT_temp > 0) && (SHT_humi > 0) && (SHT_temp < 100) && (SHT_humi < 100))
+		if((SHT_temperature > 0) && (SHT_humidity > 0) && (SHT_temperature < 100) && (SHT_humidity < 100))
 		{
-			TFT_temperature_C = (uint32_t)SHT_temp ;
-			TFT_humidity_percent = (uint32_t)SHT_humi ;
-			TFT_temperature_F = (uint32_t)SHT_temp + 273;
+			TFT_temperature_C = SHT_temperature ;
+			TFT_humidity_percent = SHT_humidity ;
 		} else
 		{
-			TFT_temperature = 0;
+			TFT_temperature_C = 0;
 			TFT_humidity_percent = 0;     
 		}
+		TFT_temperature_F = TFT_temperature_C + 273;
+		lastReadSHT_u32 = millis();
 	}
 }
 

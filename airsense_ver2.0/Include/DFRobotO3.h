@@ -18,8 +18,8 @@
 DFRobot_OzoneSensor Ozone;
 uint32_t lastgetO3data = millis();
 
-void O3_Init();
-void O3_GetData();
+void O3_init();
+void O3_getData();
 
 
 #endif  // O3_SENSOR_DF_ROBOT

@@ -8,8 +8,13 @@
 #define O3_SENSOR
 #define O3_SENSOR_DF_ROBOT
 #define O3_SENSOR_MQ131
+#define O3_GETDATA_PERIOD  (uint32_t)5000
+
+#define PIN_MQ131_POWER      2
+#define PIN_MQ131_SENSOR     4  
 
 //========================== DEFINE CHO MAN HINH ========================
+
 #define SERIAL_DEBUG_BAUDRATE   115200
 #define ERROR_READ_DISPLAY      777777
 #define NEXTION_BAUDRATE        9600
@@ -34,9 +39,11 @@
 
 //========================== DEFINE CHO MAN HINH ========================
 
-#define PIN_SDA_GPIO    26
-#define PIN_SCL_GPIO    27
-#define I2C_CLOCK_SPEED 100000ul
+#define PIN_SDA_GPIO            26
+#define PIN_SCL_GPIO            27
+#define I2C_CLOCK_SPEED         100000ul
+#define SHT85_GETDATA_PEROID    (uint32_t)5000
+
 //========================== DEFINE CHO MAN HINH ========================
 
 #define PIN_NEO_PIXEL   23
@@ -81,18 +88,18 @@ SD_Status_et  TFT_SDcard = SD_Status_et::SD_DISCONNECT;
 
 char  TFT_string[10];
 
-uint32_t  temp		  =  20;
-uint32_t  humi		  =  60;
-uint32_t  yearCalib   =  2021;
-uint32_t  TFT_o3_ppb  =  0;
-uint32_t  TFT_o3_ppm  =  0;
-uint32_t  TFT_o3_ug   =  0;
-uint32_t  min_o3_ppb  =  100;
-uint32_t  min_o3_ppm  =  100;
-uint32_t  min_o3_ug   =  100;
-uint32_t  max_o3_ppb  =  0;
-uint32_t  max_o3_ppm  =  0;
-uint32_t  max_o3_ug   =  0;
+// uint32_t    temperature_u32		=  20;
+// uint32_t    humidity_u32		=  60;
+uint32_t   yearCalib_u32  =  2021;
+uint32_t   TFT_o3_ppb     =  0;
+uint32_t   TFT_o3_ppm     =  0;
+uint32_t   TFT_o3_ug      =  0;
+uint32_t   min_o3_ppb     =  100;
+uint32_t   min_o3_ppm     =  100;
+uint32_t   min_o3_ug      =  100;
+uint32_t   max_o3_ppb     =  0;
+uint32_t   max_o3_ppm     =  0;
+uint32_t   max_o3_ug      =  0;
 
 //========================== khai bao de dung cho the nho ========================
 
@@ -105,32 +112,24 @@ char 	nameDevice1[12];
 extern int dataCalibInt   = 0;
 extern int tempCalibInt   = 0;
 extern int humiCalibInt   = 0;
+extern int tempCalibFloat = 0;
+extern int humiCalibFloat = 0;
 extern int pm1CalibInt    = 0;
 extern int pm10CalibInt   = 0;
 extern int pm25CalibInt   = 0;
-extern int tempCalibFloat = 0;
-extern int humiCalibFloat = 0;
-int getTemp = 0;
+// int getTemp = 0;
 
 //========================== cac bien de doc gia tri tu man hinh ========================
 
 
 int tempFromDisplay 	  = 0;
+int tempFloatFromDisplay  = 0;
 int humiFromDisplay 	  = 0;
+int humiFloatFromDisplay  = 0;
 int pm1FromDisplay		  = 0;
 int pm10FromDisplay 	  = 0;
 int pm25FromDisplay 	  = 0;
-int tempFloatFromDisplay  = 0;
-int humiFloatFromDisplay  = 0;
 
-//==========================  DEFINE cho cac Task  ====================================
-
-
-#define TASK_DELAY       ((TickType_t) 1000 / portTICK_PERIOD_MS)
-#define WIFI_TASK_DELAY  ((TickType_t) WIFI_TIME_RECONNECT / portTICK_PERIOD_MS)
-#define MQTT_TASK_DELAY  ((TickType_t) MQTT_TIME_SENDDATA / portTICK_PERIOD_MS)
-#define SD_TASK_DELAY    ((TickType_t) SD_TIME_WRITEDATA / portTICK_PERIOD_MS)
-#define STACK_SIZE      1024
 
 //==========================  Khai bao thoi gian   ====================================
 
@@ -139,4 +138,15 @@ int humiFloatFromDisplay  = 0;
 #define WIFI_RECONNECT_PERIOD	    (uint32_t)60000
 #define BUTTON_PRESSED_DURATION 	(uint32_t)4000
 #define WIFI_MAX_CONNECT_TRIAL      (uint8_t)120
+
+
+//==========================  DEFINE cho cac Task  ====================================
+
+
+#define TASK_DELAY       ((TickType_t) 1000 / portTICK_PERIOD_MS)
+#define WIFI_TASK_DELAY  ((TickType_t) WIFI_RECONNECT_PERIOD / portTICK_PERIOD_MS)
+#define MQTT_TASK_DELAY  ((TickType_t) MQTT_SENDDATA_PERIOD / portTICK_PERIOD_MS)
+#define SD_TASK_DELAY    ((TickType_t) SD_WRITEDATA_PERIOD / portTICK_PERIOD_MS)
+#define STACK_SIZE       1024
+
 

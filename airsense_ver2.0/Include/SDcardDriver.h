@@ -5,7 +5,8 @@
 #ifdef USING_SD_CARD
 
 #include <SD.h>
-#include <NextionDriver.h>
+#include "NextionDriver.h"
+#include "config.h"
 
 File myFile;
 File myFile2;
@@ -18,10 +19,10 @@ char fileNameCalib[] = "calib.txt";
 char nameFileCalib1[16];
 char nameFileCalib[16];
 
-void SDcard_Init();
-void Screen_SplitStringData();
-void SDcard_ReadFile();
-void SDcard_SaveDataFile(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
+void SDcard_init();
+void Screen_splitStringData();
+void SDcard_readFile();
+void SDcard_saveDataFile(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
 void runProgramWithSD();
 
 

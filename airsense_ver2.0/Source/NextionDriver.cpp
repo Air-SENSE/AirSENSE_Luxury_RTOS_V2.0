@@ -1,4 +1,4 @@
-#include <NextionDriver.h>
+#include <airsense_ver2.0/Include/NextionDriver.h>
 
 
 /**
@@ -6,7 +6,7 @@
  *
  * @return  None
  */
-void Screen_Init()
+void Screen_init()
 {
 	myNex.begin(NEXTION_BAUDRATE);
 	EEPROM.begin(EEPROM_SIZE);
@@ -18,7 +18,7 @@ void Screen_Init()
  *
  * @return  None
  */
-void Screen_GetDisplayData()
+void Screen_getDisplayData()
 {
 	// cac bien de test
 	int lastnumber  = 0;
@@ -155,7 +155,7 @@ void Screen_GetDisplayData()
  *
  * @return  None
  */
-void Screen_SaveCalibData2SDcard()
+void Screen_saveCalibData2SDcard()
 {
 	if( tempFromDisplay < -100 || tempFromDisplay >1000 || humiFromDisplay < -100 || humiFromDisplay >1000 || pm1FromDisplay < -100 || pm1FromDisplay >1000 || pm10FromDisplay < -100  || pm10FromDisplay >1000 || pm25FromDisplay < -100 || pm25FromDisplay >1000)
 	{
@@ -198,7 +198,7 @@ void Screen_SaveCalibData2SDcard()
  *
  * @return  None
  */
-void Screen_DisplayCalibData()
+void Screen_displayCalibData()
 {
 	myNex.writeNum("dl.n9.val", dataCalibInt);
 	myNex.writeNum("dl.n4.val", tempCalibInt);
@@ -217,7 +217,7 @@ void Screen_DisplayCalibData()
  *
  * @return  None
  */
-void Screen_DisplayData()
+void Screen_displayData()
 {
 	myNex.writeNum("dl.wifi.val",TFT_wifiStatus);
 	myNex.writeNum("dl.sd.val",TFT_SDcard);

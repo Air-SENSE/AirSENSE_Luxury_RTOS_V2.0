@@ -10,7 +10,7 @@
 #include <WiFiUdp.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
-#include <FreeRTOS.h>
+
 
 
 
@@ -18,16 +18,16 @@
 
 
 void DS3231_init();
-void DS3231_getData();
+bool DS3231_getData();
 
 void MQTT_initClient(char* _topic, char* _espID, PubSubClient& _mqttClient);
 void MQTT_postData(float humidity,float temperature,int pm1,int pm25,int pm10,float O3);
 
-void SDcard_init();
-void SDcard_getData(float humidity,float temperature,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int pm25_min, int maxpm25_max);
-void SDcardScreen_splitStringData();
+bool SDcard_init();
+void SDcard_getData(float humidity,float temperature,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int pm25_min, int pm25_max);
+void splitStringData(char *arrayData_pc);
 void SDcard_readFile();
-void SDcard_saveDataFile();
+void SDcard_saveDataToFile();
 void SD_runProgram();
 
 void SHT_getData();
@@ -37,8 +37,8 @@ void TFLP01_getData();
 void TFLP01_init();
 
 void Screen_init();
-void Screen_saveCalibData2SDcard();
-void Screen_getDisplayData();
+void Screen_saveCalibDataToSDcard();
+void Screen_getCalibData();
 void Screen_displayData();
 void Screen_displayCalibData();
 
@@ -55,17 +55,14 @@ bool Button_isLongPressed();
 #include "SHT85Driver.h"
 #include "TFLP01Driver.h"
 #include "DS3231Driver.h"
-
 #include "SDcardDriver.h"
-#include "MQ131Driver.h"
 #include "NextionDriver.h"
+#include "MQ131Driver.h"
 #include "ButtonDriver.h"
 #include "MQTTConnection.h"
 
 
 //==========================     SETUP       ========================
-
-typedef void* TaskHandle_t;
 
 
 TaskHandle_t WIFI_SmartConfig_Handle = NULL;
@@ -151,8 +148,8 @@ void SD_writeData_Task(void *parameters)
 {
 	for(;;)
 	{
-		SDcard_saveDataFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
-		SD_runProgram();
+		SDcard_saveDataToFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
+		//SD_runProgram();
 
 		vTaskDelay(SD_TASK_DELAY);
 	}
@@ -203,7 +200,7 @@ void setup() {
 	Serial.println("Check SD");
 	SDcard_init();
 	delay(10);
-	sprintf(nameFileCalib, "/calib-%d.txt", yearCalib_u32);
+	sprintf(fileNameCalib, "/calib-%d.txt", realTime.now().year());
 #endif
 
 ///
@@ -272,7 +269,6 @@ void setup() {
 							&Screen_display_Handle,
 							1 			// core 1
 							);
-
 
 }
 

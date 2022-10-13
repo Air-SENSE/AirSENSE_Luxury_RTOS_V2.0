@@ -1,11 +1,11 @@
 /************************************************************
- **    TFT_o3_ppb(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
+**    TFT_o3_ppb(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
 **    min_o3_ppb(int)  min_o3_ppm(float)  min_o3_ug(int)  **
 **    max_o3_ppb(int)  max_o3_ppm(float)  max_o3_ug(int)  **
 **    TFT_temp(uint8_t)            TFT_wifi               **
 **    TFT_humi(uint8_t)            TFT_SDcard             **
-**    TFT_temp_F(uint16_t)         Rx: pin 33              **
-**    TFT_pm25(int)                Tx: pin 25              **
+**    TFT_temp_F(uint16_t)         Rx: pin 33             **
+**    TFT_pm25(int)                Tx: pin 25             **
 **    TFT_pm10(int)                                       **
 **    TFT_time(string)                                    **
 ************************************************************/
@@ -19,9 +19,8 @@
 #include "config.h"
 #include "EasyNextionLibrary.h"
 #include <EEPROM.h>
+
 EasyNex myNex(Serial);
-
-
 
 
 /**
@@ -30,8 +29,22 @@ EasyNex myNex(Serial);
  * @return  None
  */
 void Screen_init(){
-	myNex.begin(SERIAL_DEBUG_BAUDRATE);
-	EEPROM.begin(512);
+	myNex.begin(NEXTION_BAUDRATE);
+	EEPROM.begin(EEPROM_SIZE);
+}
+
+
+/**
+ * @brief Lay gia tri Calib tu man hinh
+ * 
+ * @param objectName 
+ * 
+ * @return uint16_t 
+ */
+uint16_t getCalibData(const char *objectName)
+{
+	uint16_t calibValue = myNex.readNumber(objectName);
+	return (calibValue == ERROR_READ_DISPLAY) ? 0 : calibValue;
 }
 
 
@@ -40,126 +53,25 @@ void Screen_init(){
  *
  * @return  None
  */
-void Screen_getDisplayData()
+void Screen_getCalibData()
 {
-	// cac bien de test
-	int lastnumber 	= 0;
-	int lastnumber1 = 0;
-	int lastnumber2 = 0;
-	int lastnumber3 = 0;
-	int lastnumber4 = 0;
-	int lastnumber5 = 0;
-	int lastnumber6 = 0; 
+	temperature_calibInt_u16     =  getCalibData("calibEdit.n0.val");
+	humidity_calibInt_u16        =  getCalibData("calibEdit.n1.val");
+	pm1_calibInt_u32             =  getCalibData("calibEdit.n2.val");
+	pm10_calibInt_u32            =  getCalibData("calibEdit.n3.val");
+	pm25_calibInt_u32            =  getCalibData("calibEdit.n4.val");
+	tempperature_calibFloat_u16  =  getCalibData("calibEdit.n5.val"); 
+	humidity_calibFloat_u16      =  getCalibData("calibEdit.n6.val"); 
 
-	// cac bien doc gia tri calib tu man hinh
-	int number10 = myNex.readNumber("calibEdit.n8.val");  
-	int number   = myNex.readNumber("calibEdit.n0.val"); 
-	int number1  = myNex.readNumber("calibEdit.n1.val");  
-	int number2  = myNex.readNumber("calibEdit.n2.val");
-	int number3  = myNex.readNumber("calibEdit.n3.val");  
-	int number4  = myNex.readNumber("calibEdit.n4.val");
-	int number5  = myNex.readNumber("calibEdit.n5.val");  
-	int number6  = myNex.readNumber("calibEdit.n6.val");
-
-	// kiem tra loi
-	if(number != ERROR_READ_DISPLAY)
-	{                     
-		lastnumber = number;  
-		if(lastnumber !=0)                                     
-		{
-			dipslay_temperatureInt_u16 = lastnumber;
-		}
-	}
-										
-	else if(number == ERROR_READ_DISPLAY){
-		number = lastnumber;
-	}
-
-	//// read data humidity
-	if(number1 != ERROR_READ_DISPLAY){                     
-		lastnumber1 = number1;  
-		if(lastnumber1 !=0)                                     
-		{
-			display_humidityInt_u16 = lastnumber1;
-		}
-	}
-										
-	else if(number1 == ERROR_READ_DISPLAY){
-		number1 = lastnumber1;
-	}
-
-
-///// read data pm1
-	if(number2 != ERROR_READ_DISPLAY){                     
-		lastnumber2 = number2;  
-		if(lastnumber2 !=0)                                     
-		{
-			display_pm1_u16 = lastnumber2;
-		}
-	}
-										
-	else if(number2 == ERROR_READ_DISPLAY){
-		number2 = lastnumber2;
-	}
-
-///////// Read data pm10
-	if(number3 != ERROR_READ_DISPLAY){                     
-		lastnumber3 = number3;  
-		if(lastnumber3 !=0)
-		{
-			display_pm10_u16 = lastnumber3;
-		}
-	}
-										
-	else if(number3 == ERROR_READ_DISPLAY){
-		number3 = lastnumber3;
-	}
-
-		//// Read data pm2.5
-	if(number4 != ERROR_READ_DISPLAY){                     
-		lastnumber4 = number4;  
-		if(lastnumber4 !=0)
-		{
-			display_pm25_u16 = lastnumber4;
-		}
-	}
-										
-	else if(number4 == ERROR_READ_DISPLAY){
-		number4 = lastnumber4;
-	}
-			//// Read data temp Float
-	if(number5 != ERROR_READ_DISPLAY){                     
-		lastnumber5 = number5;  
-		if(lastnumber5 !=0)
-		{
-			display_tempFloat_u16 = lastnumber5;
-		}
-	}
-										
-	else if(number5 == ERROR_READ_DISPLAY){
-		number5 = lastnumber5;
-	}
-			//// Read data humi Float
-	if(number6 != ERROR_READ_DISPLAY){                     
-		lastnumber6 = number6;  
-		if(lastnumber6 !=0)                                     
-		{
-			display_humidityFloat_u16 = lastnumber6;
-		}
-	}
-										
-	else if(number6 == ERROR_READ_DISPLAY){
-		number6 = lastnumber6;
-	}
-
+// In cac du lieu tu man hinh ra 
 #ifdef DEBUG_SERIAL
-	Serial.println(dipslay_temperatureInt_u16); 
-	Serial.println(display_humidityInt_u16);
-	Serial.println(display_pm1_u16);
-	Serial.println(display_pm10_u16);
-	Serial.println(display_pm25_u16);  
-	Serial.println(display_tempFloat_u16);
-	Serial.println(display_humidityFloat_u16);
+	Serial.println(temperature_calibInt_u16    ); 
+	Serial.println(humidity_calibInt_u16       );
+	Serial.println(pm1_calibInt_u32            );
+	Serial.println(pm10_calibInt_u32           );
+	Serial.println(pm25_calibInt_u32           );
+	Serial.println(tempperature_calibFloat_u16 );
+	Serial.println(humidity_calibFloat_u16     );
 	Serial.println("--------------");
 #endif
 }
@@ -167,31 +79,32 @@ void Screen_getDisplayData()
 
 
 /**
- * @brief	Luu tru cac gia tri da calibcalib tu man hinh vao the nho
+ * @brief	Luu tru cac gia tri da calib tu man hinh vao the nho
  *
  * @return  None
  */
-void Screen_saveCalibData2SDcard()
+void Screen_saveCalibDataToSDcard()
 {
 	if( dipslay_temperatureInt_u16 < -100 || dipslay_temperatureInt_u16 >1000 || display_humidityInt_u16 < -100 || display_humidityInt_u16 >1000 || display_pm1_u16 < -100 || display_pm1_u16 >1000 || display_pm10_u16 < -100  || display_pm10_u16 >1000 || display_pm25_u16 < -100 || display_pm25_u16 >1000)
 	{
 #ifdef DEBUG_SERIAL
-		Serial.println("-----*** Dont write to SD card ***----");
+		Serial.println("----- *** Don't write to SD card *** ----");
 #endif
 	}
 	else
 	{
-		myFile = SD.open(nameFileCalib,FILE_WRITE);
+		myFile = SD.open(fileNameCalib, FILE_WRITE);
 		if(myFile)
 		{
 			char message[256] = {0};
-			sprintf(message,"%d|%d|%d|%d|%d|%d|%d|", dipslay_temperatureInt_u16,
-													 display_humidityInt_u16,
-													 display_pm1_u16,
-													 display_pm10_u16,
-													 display_pm25_u16,
-													 display_tempFloat_u16,
-													 display_humidityFloat_u16 );
+			sprintf(message,"%d|%d|%d|%d|%d|%d|%d|", temperature_calibInt_u16,   
+													 humidity_calibInt_u16,  
+													 pm1_calibInt_u32,
+													 pm10_calibInt_u32,
+													 pm25_calibInt_u32,
+													 tempperature_calibFloat_u16,
+													 humidity_calibFloat_u16 );
+
 #ifdef DEBUG_SERIAL
 			Serial.print("Message:");
 			Serial.println(message);
@@ -203,10 +116,7 @@ void Screen_saveCalibData2SDcard()
 		else
 		{ 
 			Serial.println("Reconnect SD");
-			if(!SD.begin(PIN_CS_SD_CARD, SPI)) 
-				TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
-			else 
-				TFT_SDStatus = SD_Status_et::SD_CONNECTED; 
+			SDcard_init();
 		}
 	}
 }
@@ -218,8 +128,9 @@ void Screen_saveCalibData2SDcard()
  *
  * @return  None
  */
-void Screen_displayCalibData(){
-	myNex.writeNum("dl.n9.val", data_calibInt_u32           );
+void Screen_displayCalibData()
+{
+	//myNex.writeNum("dl.n9.val", data_calibInt_u32           );
 	myNex.writeNum("dl.n4.val", temperature_calibInt_u16    );
 	myNex.writeNum("dl.n5.val", humidity_calibInt_u16       );
 	myNex.writeNum("dl.n6.val", pm1_calibInt_u32            );
@@ -229,12 +140,14 @@ void Screen_displayCalibData(){
 	myNex.writeNum("dl.n8.val", humidity_calibFloat_u16     );
 }
 
+
 /**
  * @brief	ghi cac gia tri len man hinh
  *
  * @return  None
  */
-void Screen_displayData(){
+void Screen_displayData()
+{
 	myNex.writeNum("dl.wifi.val",TFT_wifiStatus);
 	myNex.writeNum("dl.sd.val",TFT_SDStatus);
 

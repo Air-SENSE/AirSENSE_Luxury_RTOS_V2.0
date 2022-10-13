@@ -17,5 +17,6 @@
         "xhash": "cpp",
         "xtree": "cpp",
         "algorithm": "cpp"
-    }
+    },
+    "C_Cpp.dimInactiveRegions": false
 }

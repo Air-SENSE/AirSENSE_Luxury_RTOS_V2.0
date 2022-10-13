@@ -1,5 +1,5 @@
 #pragma once
-
+#if (defined(USING_MQTT))
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -66,7 +66,7 @@ void MQTT_postData (float 	humidity,
 		char message[256] = {0};
 
 		sprintf(message, 
-				"{\"DATA\":{\"O3\":\%.1f\,\"Humidity\":\%.1f\,\"Pm1\":\%d\,\"Pm10\":\%d\,\"Pm2p5\":\%d\,\"Time\":\%d\,\"Temperature\":\%.1f\},\"NodeID\":\"%s\"}",
+				"{\"DATA\":{\"O3\":%.1f,\"Humidity\":%.1f,\"Pm1\":%d,\"Pm10\":%d,\"Pm2p5\":%d,\"Time\":%d,\"Temperature\":%.1f},\"NodeID\":\"%s\"}",
 				O3,
 				humidity,
 				pm1,
@@ -94,3 +94,5 @@ void MQTT_postData (float 	humidity,
 	}
 	}
 }
+
+#endif

@@ -8,5 +8,6 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "cstddef": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

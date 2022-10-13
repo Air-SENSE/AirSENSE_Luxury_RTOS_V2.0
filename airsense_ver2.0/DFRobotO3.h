@@ -1,4 +1,5 @@
 #ifdef O3_SENSOR_DF_ROBOT
+#include "DFRobot_OzoneSensor.h"
 
 #define COLLECT_NUMBER   20              // collect number, the collection range is 1-100
 #define Ozone_IICAddress ADDRESS_3

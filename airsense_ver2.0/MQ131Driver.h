@@ -29,7 +29,7 @@ void O3_init()
  */
 void O3_getData()
 {
-if(millis()-lastgetO3data > 5000)
+	if(millis()-lastgetO3data > 5000)
 	{
 		TFT_o3_ppb = random(30,46);
 		if(min_o3_ppb > TFT_o3_ppb ) min_o3_ppb = TFT_o3_ppb;
@@ -43,4 +43,5 @@ if(millis()-lastgetO3data > 5000)
 		lastgetO3data = millis();
 	}
 }
+
 #endif

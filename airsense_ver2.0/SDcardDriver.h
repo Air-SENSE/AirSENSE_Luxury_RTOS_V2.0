@@ -11,37 +11,37 @@ typedef enum
 
 SD_Status_et TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
 
+
 File myFile;
 File myFile2;
 File myFile3;
-File myFile4;
-const int chipSelect = 5;
 
-char char_array[30];
-char fileNameCalib[] = "calib.txt";
+char fileNameCalib[] = "calib.txt";			// file chua cac gia tri calib
+char nameFileSaveData[10];					// ten file luu du lieu cua sensor theo tung ngay
 
-char nameFileCalib1[16];
-char nameFileCalib[16];
 
 /**
  * @brief	ham de khoi tao the nho
  *
  * @return  None
  */
-void SDcard_init()
+bool SDcard_init()
 {
-SPI.begin(PIN_NUM_CLK, PIN_NUM_MISO, PIN_NUM_MOSI, PIN_CS_SD_CARD);
-pinMode(SS, OUTPUT);
-if (!SD.begin(PIN_CS_SD_CARD))
-{
-	TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
-	Serial.println("SD init false.");
-}
-else
-{
-	TFT_SDStatus = SD_Status_et::SD_CONNECTED;
-	Serial.println("SD init done.");
-}
+	SPI.begin(PIN_NUM_CLK, PIN_NUM_MISO, PIN_NUM_MOSI, PIN_CS_SD_CARD);
+	pinMode(SS, OUTPUT);
+
+	if (SD.begin(PIN_CS_SD_CARD))
+	{
+		TFT_SDStatus = SD_Status_et::SD_CONNECTED;
+		Serial.println("SD init done.");
+		return false;
+	}
+	else
+	{
+		TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
+		Serial.println("SD init false.");
+		return true;		
+	}
 }
 
 /**
@@ -49,25 +49,25 @@ else
  *
  * @return  None
  */
-void Screen_splitStringData()
+void splitStringData(char *arrayData_pc)
 {
 #ifdef DEBUG_SERIAL
 	Serial.print("Char_arr in split: ");
-	Serial.println(char_array);
+	Serial.println(arrayData_pc);
 #endif
 
-	char temperature[30] 	= "";
-	char humidityi[30] 		= "";
-	char pm1[30] 			= "";
-	char pm10[30] 			= "";
-	char pm25[30] 			= "";
-	char temperatureFl[30] 	= "";
-	char humidityiFl[30] 	= "";
+	char temperature[30] 		= "";
+	char humidityi[30] 			= "";
+	char pm1[30] 				= "";
+	char pm10[30] 				= "";
+	char pm25[30] 				= "";
+	char temperatureFloat[30] 	= "";
+	char humidityiFloat[30] 	= "";
 
 	// split string
-	char *token_ps = NULL;			// token_ps: con trỏ trỏ đên chuỗi sau khi đã cắt token
+	char *token_ps = NULL;			// token_ps: con trỏ trỏ đến chuỗi sau khi đã cắt token
 	
-	token_ps = strtok(char_array, "|");
+	token_ps = strtok(arrayData_pc, "|");
 	if (token_ps)		strcpy(temperature, token_ps);
 	temperature_calibInt_u16 = atoi(temperature);
 
@@ -88,12 +88,12 @@ void Screen_splitStringData()
 	pm25_calibInt_u32 = atoi(pm25);
 
 	token_ps = strtok(NULL, "|");
-	if (token_ps)		strcpy(temperatureFl, token_ps);
-	tempperature_calibFloat_u16 = atoi(temperatureFl);
+	if (token_ps)		strcpy(temperatureFloat, token_ps);
+	tempperature_calibFloat_u16 = atoi(temperatureFloat);
 
 	token_ps = strtok(NULL, "|");
-	if (token_ps)		strcpy(humidityiFl, token_ps);
-	humidity_calibFloat_u16 = atoi(humidityiFl);
+	if (token_ps)		strcpy(humidityiFloat, token_ps);
+	humidity_calibFloat_u16 = atoi(humidityiFloat);
 
 #ifdef DEBUG_SERIAL
 	Serial.println("After Split: ");
@@ -104,9 +104,21 @@ void Screen_splitStringData()
 	Serial.println(pm25_calibInt_u32);
 	Serial.println(tempperature_calibFloat_u16);
 	Serial.println(humidity_calibFloat_u16);
-	Serial.println("*********");
+	Serial.println("*************");
 #endif
 }
+
+/**
+ * @brief lay ten file luu du lieu theo nam,thang,ngay
+ * 
+ * @return char* 
+ */
+char * getNameFile()
+{
+	strcpy(nameFileSaveData, realTime.now().toString("YY-MMM-DD"));
+	return nameFileSaveData;
+}
+
 
 /**
  * @brief	Doc file tu trong the nho
@@ -115,22 +127,26 @@ void Screen_splitStringData()
  */
 void SDcard_readFile()
 {
-	myFile3 = SD.open(nameFileCalib, FILE_READ);
+	char arrayData[30];
+	myFile3 = SD.open(fileNameCalib, FILE_READ);
 	String finalString = "";
 
 	while (myFile3.available())
 	{
 		finalString += (char)myFile3.read();
 	}
-	strcpy(char_array, finalString.c_str());
+	strcpy(arrayData, finalString.c_str());
+
 	#ifdef DEBUG_SERIAL
-	Serial.println("--- Reading file ---");
-	Serial.print("char_array:");
-	Serial.println(char_array);
+		Serial.println("----- Reading file -----");
+		Serial.print("Data:");
+		Serial.println(arrayData);
 	#endif
-	Screen_splitStringData();
+
+	splitStringData(arrayData);
 	myFile3.close();
 }
+
 
 /**
  * @brief	ham de luu gia tri vao the nho
@@ -139,96 +155,68 @@ void SDcard_readFile()
  * @param	pm1 - pm1.0
  * @param	pm25 - pm2.5
  * @param	pm10 - pm10
- * @param	O3ppb - 03
- * @param	O3ppm - 03
- * @param	O3ug - 03
- * @param	minpm25 - muc min cua pm25
- * @param	maxpm25 - muc max cua pm25
+ * @param	O3ppb - 03 don vi do ppb
+ * @param	O3ppm - 03 don vi do ppm
+ * @param	O3ug - 03 don vi do ug
+ * @param	pm25_min - muc min cua pm25
+ * @param	pm25_max - muc max cua pm25
  * @return  None
  */
-void SDcard_saveDataFile(float 	humidity,
-						 float 	temperature,
-						 int   	pm1,
-						 int   	pm25,
-						 int 	pm10,
-						 int 	O3ppb,
-						 float 	O3ppm,
-						 float 	O3ug,
-						 int 	pm25_min,
-						 int 	pm25_max )
+void SDcard_saveDataToFile( float 	humidity,
+						 	float 	temperature,
+						 	int   	pm1,
+						 	int   	pm25,
+						 	int 	pm10,
+						 	int 	O3ppb,
+						 	float 	O3ppm,
+						 	float 	O3ug,
+						 	int 	pm25_min,
+						 	int 	pm25_max )
 {
-	DateTime now = rtc.now();
-	int getyear = now.year();
-	uint8_t getmonth = now.month();
-	uint8_t getday = now.day();
-	uint8_t gethour = now.hour();
-	uint8_t getminute = now.minute();
-	uint8_t getsecond = now.second();
-	uint32_t epochTime = now.unixtime();
-	uint8_t y = getyear % 2000;
+	
+	char dateTime_string[21];
+	strcpy(dateTime_string, realTime.now().toString("YYYY-MMM-DD,hh:mm:ss"));		// lay chuoi ki tu thoi gian
 
-	char filename[16];
-	if (getday < 10 && getmonth < 10)
-		sprintf(filename, "/%d-0%d-0%d.txt", y, getmonth, getday);
-	if (getday < 10 && getmonth >= 10)
-		sprintf(filename, "/%d-%d-0%d.txt", y, getmonth, getday);
-	if (getday >= 10 && getmonth < 10)
-		sprintf(filename, "/%d-0%d-%d.txt", y, getmonth, getday);
-	if (getday >= 10 && getmonth >= 10)
-		sprintf(filename, "/%d-%d-%d.txt", y, getmonth, getday);
-
-	if (0 <= y && y <= 22 && 0 < getmonth && getmonth <= 12 && 0 < getday && getday <= 31)
+	if (realTime.now().isValid())		// kiem tra 
 	{
-		myFile = SD.open(filename, FILE_WRITE);
+		myFile = SD.open(nameFileSaveData, FILE_APPEND);
 		if (myFile)
 		{
-		char message[256] = {0};
-
-		sprintf(message, "%12s,%4d/%d/%d,%d:%d:%d,%d,%.1f,%.1f,%d,%d,%d,%d,%d,%d,%.3f,%.1f",
-						nameDevice,
-						getyear,
-						getmonth,
-						getday,
-						gethour,
-						getminute,
-						getsecond,
-						epochTime,
-						temperature,
-						humidity,
-						pm1,
-						pm25,
-						pm10,
-						pm25_min,
-						pm25_max,
-						O3ppb,
-						O3ppm,
-						O3ug );
+			char message[256] = {0};
+			sprintf(message,"%12s,%s,%.1f,%.1f,%d,%d,%d,%d,%d,%d,%.3f,%.1f\n",
+							nameDevice,
+							dateTime_string,
+							temperature,
+							humidity,
+							pm1,
+							pm25,
+							pm10,
+							pm25_min,
+							pm25_max,
+							O3ppb,
+							O3ppm,
+							O3ug );
 
 
 	#ifdef DEBUG_SERIAL
-		Serial.println(message);
+			Serial.println(message);
 	#endif
-		TFT_SDStatus = SD_Status_et::SD_CONNECTED;
-		myFile.println(message);
-		myFile.close();
+			myFile.println(message);
+			myFile.close();
 		}
 		else
 		{
-	#ifdef DEBUG_SERIAL
-		// Serial.println("reconnect SD");
-	#endif
-		if (!SD.begin(PIN_CS_SD_CARD, SPI))
-			TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
-		else
-			TFT_SDStatus = SD_Status_et::SD_CONNECTED;
+			if (SD.begin(PIN_CS_SD_CARD, SPI))
+				TFT_SDStatus = SD_Status_et::SD_CONNECTED;
+			else
+				TFT_SDStatus = SD_Status_et::SD_DISCONNECT;
 		}
 	}
 	else
 	{
-	#ifdef DEBUG_SERIAL
-		Serial.println("--------------Loi lay ngay sai: " + String(filename) + "---------------");
-		// rtc.begin();
-	#endif
+#ifdef DEBUG_SERIAL
+		Serial.println("-------------- Loi lay ngay sai ---------------");
+#endif
 	}
 }
 
@@ -240,8 +228,8 @@ void SDcard_saveDataFile(float 	humidity,
  */
 void SD_runProgram()
 {
-	// doc gia tri tu man hinh
-	Screen_getDisplayData();
+	// doc cac gia tri calib tu man hinh
+	Screen_getCalibData();
 
 	// neu man hinh moi khoi tao
 	if (dipslay_temperatureInt_u16 == 0 && display_humidityInt_u16 == 0 && display_pm1_u16 == 0 && display_pm10_u16 == 0 && display_pm25_u16 == 0)
@@ -253,11 +241,9 @@ void SD_runProgram()
 	}
 	else
 	{
-		// doc gia tri tu calib vao the sd
-		Screen_saveCalibData2SDcard();
-		// doc nguoc lai the sd
-		SDcard_readFile();
-		// hien thi lai len man hinh
+		// luu gia tri tu calib vao the sd
+		Screen_saveCalibDataToSDcard();
+		// hien thi cac gia tri calib len man hinh
 		Screen_displayCalibData();
 	}
 }

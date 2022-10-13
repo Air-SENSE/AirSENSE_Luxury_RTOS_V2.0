@@ -13,8 +13,8 @@
 #define PIN_MQ131_SENSOR     4  
 
 //========================== DEFINE CHO MAN HINH ========================
-#define SERIAL_DEBUG_BAUDRATE 115200
-#define ERROR_READ_DISPLAY 777777
+#define SERIAL_DEBUG_BAUDRATE   115200
+#define ERROR_READ_DISPLAY      777777
 #define NEXTION_BAUDRATE        9600
 #define EEPROM_SIZE             512
 
@@ -48,9 +48,9 @@
 
 #define PIN_BUTTON_1    35
 #define PIN_BUTTON_2    34
-#define outputA         33
-#define outputB         25
-#define switch          32
+// #define outputA         33
+// #define outputB         25
+// #define switch          32
 
 //========================== DEFINE CHO MAN HINH ========================
 
@@ -75,36 +75,34 @@ uint32_t lastsenddatatoSD_MQTT = millis();
 
 char  TFT_string[10];
 
-float  temp		        = 20.5;
-float  humi		        = 60;
+float      temp		        = 20.5;
+float      humi		        = 60;
 uint32_t   yearCalib_u32    = 2021;
-int    TFT_o3_ppb       = 0;
-float  TFT_o3_ppm       = 0;
-float  TFT_o3_ug        = 0;
-int    min_o3_ppb       = 100;
-float  min_o3_ppm       = 100;
-float  min_o3_ug        = 100;
-int    max_o3_ppb       = 0;
-float  max_o3_ppm       = 0;
-float  max_o3_ug        = 0;
+int        TFT_o3_ppb       = 0;
+float      TFT_o3_ppm       = 0;
+float      TFT_o3_ug        = 0;
+int        min_o3_ppb       = 100;
+float      min_o3_ppm       = 100;
+float      min_o3_ug        = 100;
+int        max_o3_ppb       = 0;
+float      max_o3_ppm       = 0;
+float      max_o3_ug        = 0;
 
 //========================== khai bao de dung cho the nho ========================
 
-bool  	stateSDcard	 = 0;
 //uint8_t MacAddress[6];
 char 	nameDevice[12];
 
 //========================== cac bien de calib gia tri ========================
 
-extern uint32_t data_calibInt_u32           = 0;
-extern uint16_t temperature_calibInt_u16    = 0;
-extern uint16_t humidity_calibInt_u16       = 0;
-extern uint32_t pm1_calibInt_u32            = 0;
-extern uint32_t pm10_calibInt_u32           = 0;
-extern uint32_t pm25_calibInt_u32           = 0;
-extern uint16_t tempperature_calibFloat_u16 = 0;
-extern uint16_t humidity_calibFloat_u16     = 0;
-int getTemp = 0;
+ uint32_t data_calibInt_u32           = 0;
+ uint16_t temperature_calibInt_u16    = 0;
+ uint16_t humidity_calibInt_u16       = 0;
+ uint32_t pm1_calibInt_u32            = 0;
+ uint32_t pm10_calibInt_u32           = 0;
+ uint32_t pm25_calibInt_u32           = 0;
+ uint16_t tempperature_calibFloat_u16 = 0;
+ uint16_t humidity_calibFloat_u16     = 0;
 
 //========================== cac bien de doc gia tri tu man hinh ========================
 
@@ -113,13 +111,13 @@ uint16_t  display_humidityInt_u16 	    = 0;
 uint16_t  display_pm1_u16		        = 0;
 uint16_t  display_pm10_u16 	            = 0;
 uint16_t  display_pm25_u16	            = 0;
-uint16_t  display_tempFloat_u16         = 0;
+uint16_t  display_temperatureFloat_u16  = 0;
 uint16_t  display_humidityFloat_u16     = 0;
 
 
 #define MQTT_SENDDATA_PERIOD	    (uint32_t)10000
 #define SD_WRITEDATA_PERIOD		    (uint32_t)10000
-#define WIFI_RECONNECT_PERIOD	    (uint32_t)60000
+#define WIFI_RECONNECT_PERIOD	    (uint32_t)6000
 #define BUTTON_PRESSED_DURATION 	(uint32_t)4000
 #define WIFI_MAX_CONNECT_TRIAL      (uint8_t)120
 

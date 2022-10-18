@@ -4,16 +4,17 @@
 
 #include "config.h"
 
-uint32_t     TFLP01_pm10sum_u32		= 0;
-uint32_t     TFLP01_pm25sum_u32 	= 0;
-uint32_t     TFLP01_pm1sum_u32 		= 0;
-uint32_t	 dataTFLP01count_u32 	= 0;
+// uint32_t     TFLP01_pm10sum_u32		= 0;
+// uint32_t     TFLP01_pm25sum_u32 	= 0;
+// uint32_t     TFLP01_pm1sum_u32 		= 0;
+// uint32_t	 dataTFLP01count_u32 	= 0;
 bool 	     TFLP01_readStatus_bl  	= false;
 uint32_t	 TFT_pm1_u32		   	= 0;
 uint32_t	 TFT_pm25_u32		    = 0;
 uint32_t	 TFT_pm10_u32			= 0;
 uint32_t	 pm25_min_u32		   	= 1000;
 uint32_t	 pm25_max_u32		   	= 0;
+
 
 /**
  * @brief  Return CRC trong data response của TF-LP-01
@@ -43,7 +44,7 @@ uint16_t crc16_modbus(uint8_t *modbusdata , uint16_t Length)
  */
 void TFLP01_init()
 {
-	Serial2.begin(115200);
+	Serial2.begin(115200);		// khoi dong Serial2
 }
 
 
@@ -62,19 +63,13 @@ void TFLP01_getData()
 		{
 			Serial.print(i);
 			Serial.print(": ");
-			byte TFLP01_readData_byte = Serial2.read();
-			TFLP01_data_a8[i] = (uint8_t)TFLP01_readData_byte;
+			byte TFLP01_readData_byte = Serial2.read();			// doc tung byte du lieu tu TFLP01 qua Serial2
+			TFLP01_data_a8[i] = (uint8_t)TFLP01_readData_byte;	// luu du lieu vua doc duoc vao mang du lieu cua TFLP01
 			Serial.println(TFLP01_readData_byte);
 		}
 		
 		TFLP01_readStatus_bl = true;
 	}
-	//  while(Serial2.available() > 0) Serial2.read();
-	//      Serial.println(TFLP01data[15] + TFLP01data[16]<<8 );
-	//      Serial.println(crc16_modbus(TFLP01data, 15));
-	//    if (TFLP01data[15] + TFLP01data[16]<<8 == crc16_modbus(TFLP01data, 15))
-	//    {
-	//    }
 
 	// lay du lieu tam thoi (chua co datasheet)
 	if(TFLP01_readStatus_bl == true)
@@ -83,15 +78,16 @@ void TFLP01_getData()
 		TFT_pm1_u32  = TFLP01_data_a8[9]  + TFLP01_data_a8[10]*256 + pm1_calibInt_u32;
 		TFT_pm25_u32 = TFLP01_data_a8[11] + TFLP01_data_a8[12]*256 + pm25_calibInt_u32;
 		TFT_pm10_u32 = TFLP01_data_a8[13] + TFLP01_data_a8[14]*256 + pm10_calibInt_u32;
+
 		if(TFT_pm25_u32 != 255)
 		{
-		if(pm25_max_u32 < TFT_pm25_u32) pm25_max_u32 = TFT_pm25_u32;
-		if(pm25_min_u32 > TFT_pm25_u32) pm25_min_u32 = TFT_pm25_u32;
+			if(pm25_max_u32 < TFT_pm25_u32) pm25_max_u32 = TFT_pm25_u32;
+			if(pm25_min_u32 > TFT_pm25_u32) pm25_min_u32 = TFT_pm25_u32;
 		}
 
 #ifdef  DEBUG_SERIAL
-
-		for(uint8_t i=0; i<17; i++)
+		// in du lieu ra man hinh Serial
+		for(uint8_t i=0; i < 17; i++)
 		{
 			Serial.print(i);
 			Serial.print(": ");

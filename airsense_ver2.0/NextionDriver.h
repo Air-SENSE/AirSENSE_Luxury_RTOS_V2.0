@@ -1,7 +1,7 @@
 /************************************************************
-**    TFT_o3_ppb(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
-**    min_o3_ppb(int)  min_o3_ppm(float)  min_o3_ug(int)  **
-**    max_o3_ppb(int)  max_o3_ppm(float)  max_o3_ug(int)  **
+**    TFT_o3_ppb_u32(int)  TFT_o3_ppm(float)  TFT_o3_ug(int)  **    
+**    min_o3_ppb_u32(int)  min_o3_ppm(float)  min_o3_ug(int)  **
+**    max_o3_ppb_u32(int)  max_o3_ppm(float)  max_o3_ug(int)  **
 **    TFT_temp(uint8_t)            TFT_wifi               **
 **    TFT_humi(uint8_t)            TFT_SDcard             **
 **    TFT_temp_F(uint16_t)         Rx: pin 33             **
@@ -10,34 +10,34 @@
 **    TFT_time(string)                                    **
 ************************************************************/
 
-/* Khai bao thu vien man hinh TFT */
+/* Khai bao thu vien man hinh Nextion */
 #pragma once
-#include <iostream>
 #include <string>
 #include "string.h"
-#include <sstream>
 #include "config.h"
 #include "EasyNextionLibrary.h"
 #include <EEPROM.h>
 
-EasyNex myNex(Serial);
+EasyNex myNex(Serial);			// khia bao doi tuong man hinh Nextion ket noi Serial (Serial1)
 
 
 /**
- * @brief	Khoi tao man hinh
+ * @brief	Khoi tao man hinh Nextion
  *
  * @return  None
  */
-void Screen_init(){
-	myNex.begin(NEXTION_BAUDRATE);
-	EEPROM.begin(EEPROM_SIZE);
+void Screen_init()
+{
+	myNex.begin(NEXTION_BAUDRATE);		// khoi dong man hinh Nextion 
+	EEPROM.begin(EEPROM_SIZE);			// khoi dong EEPROM cua man hinh Nextion
 }
 
 
 /**
- * @brief Lay gia tri Calib tu man hinh
+ * @brief Lay gia tri Calib của objectName tu man hinh
  * 
- * @param objectName 
+ * @param objectName: paremetter use to read the value of a components' numeric attribute on Nextion
+ * In every component's numeric attribute (value, bco color, pco color...etc)
  * 
  * @return uint16_t 
  */
@@ -49,33 +49,48 @@ uint16_t getCalibData(const char *objectName)
 
 
 /**
- * @brief	Doc du lieu tu man hinh va du vao cac bien
+ * @brief	Doc du lieu tu man hinh va luu vao cac bien
  *
  * @return  None
  */
 void Screen_getCalibData()
 {
-	temperature_calibInt_u16     =  getCalibData("calibEdit.n0.val");
-	humidity_calibInt_u16        =  getCalibData("calibEdit.n1.val");
-	pm1_calibInt_u32             =  getCalibData("calibEdit.n2.val");
-	pm10_calibInt_u32            =  getCalibData("calibEdit.n3.val");
-	pm25_calibInt_u32            =  getCalibData("calibEdit.n4.val");
-	tempperature_calibFloat_u16  =  getCalibData("calibEdit.n5.val"); 
-	humidity_calibFloat_u16      =  getCalibData("calibEdit.n6.val"); 
+	temperature_calibInt_u16     =  getCalibData("calibEdit.n0.val");		// lay gia tri tu dia chi bien tren man hinh
+	humidity_calibInt_u16        =  getCalibData("calibEdit.n1.val");		// lay gia tri tu dia chi bien tren man hinh
+	pm1_calibInt_u32             =  getCalibData("calibEdit.n2.val");		// lay gia tri tu dia chi bien tren man hinh
+	pm10_calibInt_u32            =  getCalibData("calibEdit.n3.val");		// lay gia tri tu dia chi bien tren man hinh
+	pm25_calibInt_u32            =  getCalibData("calibEdit.n4.val");		// lay gia tri tu dia chi bien tren man hinh
+	tempperature_calibFloat_u16  =  getCalibData("calibEdit.n5.val");		// lay gia tri tu dia chi bien tren man hinh
+	humidity_calibFloat_u16      =  getCalibData("calibEdit.n6.val");		// lay gia tri tu dia chi bien tren man hinh
 
-// In cac du lieu tu man hinh ra 
+// In cac du lieu tu man hinh ra Serial
 #ifdef DEBUG_SERIAL
-	Serial.println(temperature_calibInt_u16    ); 
-	Serial.println(humidity_calibInt_u16       );
-	Serial.println(pm1_calibInt_u32            );
-	Serial.println(pm10_calibInt_u32           );
-	Serial.println(pm25_calibInt_u32           );
-	Serial.println(tempperature_calibFloat_u16 );
-	Serial.println(humidity_calibFloat_u16     );
+	Serial.println(temperature_calibInt_u16    );		// in cac gia tri calib ra Serial
+	Serial.println(humidity_calibInt_u16       );		// in cac gia tri calib ra Serial
+	Serial.println(pm1_calibInt_u32            );		// in cac gia tri calib ra Serial
+	Serial.println(pm10_calibInt_u32           );		// in cac gia tri calib ra Serial
+	Serial.println(pm25_calibInt_u32           );		// in cac gia tri calib ra Serial
+	Serial.println(tempperature_calibFloat_u16 );		// in cac gia tri calib ra Serial
+	Serial.println(humidity_calibFloat_u16     );		// in cac gia tri calib ra Serial
 	Serial.println("--------------");
 #endif
 }
 
+
+/**
+ * @brief kiem tra cac gia tri calib
+ * 
+ * @return true neu cac gia tri hop le
+ * @return false neu cac gia tri khong hop le
+ */
+bool checkDataValid()
+{
+	return  ((temperature_calibInt_u16 < -100) 	|| (temperature_calibInt_u16 > 1000) ||
+			 (humidity_calibInt_u16 < -100)		|| (humidity_calibInt_u16 > 1000)	 ||
+			 (pm1_calibInt_u32 < -100)			|| (pm1_calibInt_u32 > 1000) 		 ||
+			 (pm10_calibInt_u32 < -100)			|| (pm10_calibInt_u32 > 1000) 		 ||
+			 (pm25_calibInt_u32 < -100) 		|| (pm25_calibInt_u32 > 1000));
+}
 
 
 /**
@@ -85,38 +100,40 @@ void Screen_getCalibData()
  */
 void Screen_saveCalibDataToSDcard()
 {
-	if( dipslay_temperatureInt_u16 < -100 || dipslay_temperatureInt_u16 >1000 || display_humidityInt_u16 < -100 || display_humidityInt_u16 >1000 || display_pm1_u16 < -100 || display_pm1_u16 >1000 || display_pm10_u16 < -100  || display_pm10_u16 >1000 || display_pm25_u16 < -100 || display_pm25_u16 >1000)
+	if (checkDataValid())
 	{
 #ifdef DEBUG_SERIAL
-		Serial.println("----- *** Don't write to SD card *** ----");
+		Serial.println("----- *** Don't write to SD card *** ----");			// in ra Serail
 #endif
 	}
 	else
 	{
-		myFile = SD.open(fileNameCalib, FILE_WRITE);
-		if(myFile)
+		File writeFile;
+		writeFile = SD.open(fileNameCalib, FILE_APPEND);
+		if(writeFile)		// kiem tra mo file co thanh cong
 		{
+			// tao chuoi string theo cau truc: temperature|humidity|PM1.0|PM2.5|PM10|temperature_float|humidity_float
 			char message[256] = {0};
-			sprintf(message,"%d|%d|%d|%d|%d|%d|%d|", temperature_calibInt_u16,   
-													 humidity_calibInt_u16,  
-													 pm1_calibInt_u32,
-													 pm10_calibInt_u32,
-													 pm25_calibInt_u32,
-													 tempperature_calibFloat_u16,
-													 humidity_calibFloat_u16 );
+			sprintf(message,"%u|%u|%u|%u|%u|%u|%u\n", temperature_calibInt_u16,   
+													  humidity_calibInt_u16,  
+													  pm1_calibInt_u32,
+													  pm10_calibInt_u32,
+													  pm25_calibInt_u32,
+													  tempperature_calibFloat_u16,
+													  humidity_calibFloat_u16 );
 
 #ifdef DEBUG_SERIAL
-			Serial.print("Message:");
-			Serial.println(message);
+			Serial.print("Message: ");
+			Serial.println(message);							// in du lieu duoc tao ben tren ra Serial
 #endif
-			TFT_SDStatus = SD_Status_et::SD_CONNECTED;
-			myFile.println(message);        
-			myFile.close();
+			TFT_SDStatus = SD_Status_et::SD_CONNECTED;			// cap nhat trang tahi the nho
+			writeFile.println(message);        					// ghi du lieu ra the nho
+			writeFile.close();										// dong the nho
 		}
 		else
-		{ 
-			Serial.println("Reconnect SD");
-			SDcard_init();
+		{
+			Serial.println("Reconnect SD.");
+			SDcard_init();										// khoi dong lai the nho
 		}
 	}
 }
@@ -131,13 +148,13 @@ void Screen_saveCalibDataToSDcard()
 void Screen_displayCalibData()
 {
 	//myNex.writeNum("dl.n9.val", data_calibInt_u32           );
-	myNex.writeNum("dl.n4.val", temperature_calibInt_u16    );
-	myNex.writeNum("dl.n5.val", humidity_calibInt_u16       );
-	myNex.writeNum("dl.n6.val", pm1_calibInt_u32            );
-	myNex.writeNum("dl.n7.val", pm10_calibInt_u32           );
-	myNex.writeNum("dl.n8.val", pm25_calibInt_u32           );
-	myNex.writeNum("dl.n7.val", tempperature_calibFloat_u16 );
-	myNex.writeNum("dl.n8.val", humidity_calibFloat_u16     );
+	myNex.writeNum("dl.n4.val", temperature_calibInt_u16    );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n5.val", humidity_calibInt_u16       );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n6.val", pm1_calibInt_u32            );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n7.val", pm10_calibInt_u32           );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n8.val", pm25_calibInt_u32           );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n7.val", tempperature_calibFloat_u16 );		// lay gia tri calib tren man hinh vao bien
+	myNex.writeNum("dl.n8.val", humidity_calibFloat_u16     );		// lay gia tri calib tren man hinh vao bien
 }
 
 
@@ -148,69 +165,40 @@ void Screen_displayCalibData()
  */
 void Screen_displayData()
 {
-	myNex.writeNum("dl.wifi.val",TFT_wifiStatus);
-	myNex.writeNum("dl.sd.val",TFT_SDStatus);
+	myNex.writeNum("dl.wifi.val", TFT_wifiStatus);		// cap nhat trang thai wifi
+	myNex.writeNum("dl.sd.val", TFT_SDStatus);			// cap nhat trang thai the SD
 
-	myNex.writeStr("dl.time.txt",TFT_time_string);
+	if (realTime.now().isValid())		// kiem tra thoi gian co hop le
+	{
+		myNex.writeStr("dl.time.txt", realTime.now().toString("hh:mm DD-MMM-YY")); 		// in thoi gian ra man hinh neu thoi gian hop le
+	} else {
+		myNex.writeStr("dl.time.txt", "??:?? Na-NaN-NaN");								// in ra chuoi thoi gian loi neu thoi gian khong hop le
+	}
+	
+	myNex.writeStr("dl.temc.txt"   , String(TFT_temperature_C, 1U));
+	myNex.writeStr("dl.hum.txt"    , String(TFT_humidity_percent, 1U));
+	myNex.writeStr("dl.temf.txt"   , String(TFT_temperature_F, 1U));
 
-	sprintf(TFT_string,"%.1f",TFT_temperature_C);
-	myNex.writeStr("dl.temc.txt",TFT_string);
+	myNex.writeNum("dl.nppb.val"   , TFT_o3_ppb_u32);					// ghi gia tri O3 thoe don vi ppm ra man hinh 
+	myNex.writeStr("dl.sppb.txt"   , String(TFT_o3_ppb_u32, 10));		// ghi 
 
-	sprintf(TFT_string,"%.1f",TFT_humidity_percent);
-	myNex.writeStr("dl.hum.txt",TFT_string);
+	myNex.writeStr("dl.sug.txt"    , String(TFT_o3_ug, 1U));
+	myNex.writeStr("dl.sppm.txt"   , String((TFT_o3_ppb_u32/1000.0), 3U));
+	myNex.writeStr("dl.sminppb.txt", String(min_o3_ppb_u32, 10));
+	myNex.writeStr("dl.sminug.txt" , String(min_o3_ug, 1U));
+	myNex.writeStr("dl.sminppm.txt", String((min_o3_ppb_u32/1000.0), 3U));
+	myNex.writeStr("dl.smaxppb.txt", String(max_o3_ppb_u32, 10));
+	myNex.writeStr("dl.smaxug.txt" , String(max_o3_ug, 1U));
+	myNex.writeStr("dl.smaxppm.txt", String((max_o3_ppb_u32/1000.0), 3U));
 
-	sprintf(TFT_string,"%.1f",TFT_temperature_F);
-	myNex.writeStr("dl.temf.txt",TFT_string);
+	myNex.writeNum("dl.npm25.val"  , TFT_pm25_u32);					// in gia tri bui PMx ra dia chi bien tren man hinh
+	myNex.writeNum("dl.npm1.val"   , TFT_pm1_u32);					// in gia tri bui PMx ra dia chi bien tren man hinh
+	myNex.writeNum("dl.npm10.val"  , TFT_pm10_u32);					// in gia tri bui PMx ra dia chi bien tren man hinh
 
-	myNex.writeNum("dl.nppb.val",TFT_o3_ppb);
-	sprintf(TFT_string,"%d",TFT_o3_ppb);
-	myNex.writeStr("dl.sppb.txt",TFT_string);
-
-	sprintf(TFT_string,"%.1f",TFT_o3_ug);
-	myNex.writeStr("dl.sug.txt",TFT_string);
-
-	if(TFT_o3_ppb<10)	sprintf(TFT_string,"0.00%d",TFT_o3_ppb);
-	if(10<=TFT_o3_ppb && TFT_o3_ppb<100)	sprintf(TFT_string,"0.0%d",TFT_o3_ppb);
-	if(100<=TFT_o3_ppb && TFT_o3_ppb<1000)	sprintf(TFT_string,"0.%d",TFT_o3_ppb);
-	if(1000 <= TFT_o3_ppb)	sprintf(TFT_string,"%d.%d",int(TFT_o3_ppb/1000),int(TFT_o3_ppb%1000));
-	myNex.writeStr("dl.sppm.txt",TFT_string);
-
-	sprintf(TFT_string,"%d",min_o3_ppb);
-	myNex.writeStr("dl.sminppb.txt",TFT_string);
-
-	sprintf(TFT_string,"%.1f",min_o3_ug);
-	myNex.writeStr("dl.sminug.txt",TFT_string);
-
-	if(min_o3_ppb<10)	sprintf(TFT_string,"0.00%d",min_o3_ppb);
-	if(10<=min_o3_ppb && min_o3_ppb<100)	sprintf(TFT_string,"0.0%d",min_o3_ppb);
-	if(100<=min_o3_ppb && min_o3_ppb<1000)	sprintf(TFT_string,"0.%d",min_o3_ppb);
-	if(1000 <= min_o3_ppb)	sprintf(TFT_string,"%d.%d",int(min_o3_ppb/1000),int(min_o3_ppb%1000));
-	myNex.writeStr("dl.sminppm.txt",TFT_string);
-
-	sprintf(TFT_string,"%d",max_o3_ppb);
-	myNex.writeStr("dl.smaxppb.txt",TFT_string);
-
-	sprintf(TFT_string,"%.1f",max_o3_ug);
-	myNex.writeStr("dl.smaxug.txt",TFT_string);
-
-	if(max_o3_ppb<10)	sprintf(TFT_string,"0.00%d",max_o3_ppb);
-	if(10<=max_o3_ppb && max_o3_ppb<100)	sprintf(TFT_string,"0.0%d",max_o3_ppb);
-	if(100<=max_o3_ppb && max_o3_ppb<1000)	sprintf(TFT_string,"0.%d",max_o3_ppb);
-	if(1000 <= max_o3_ppb)	sprintf(TFT_string,"%d.%d",int(max_o3_ppb/1000),int(max_o3_ppb%1000));
-	myNex.writeStr("dl.smaxppm.txt",TFT_string);
-
-	myNex.writeNum("dl.npm25.val",TFT_pm25_u32);
-	myNex.writeNum("dl.npm1.val",TFT_pm1_u32);
-	myNex.writeNum("dl.npm10.val",TFT_pm10_u32);
-	sprintf(TFT_string,"%d",TFT_pm1_u32);
-	myNex.writeStr("dl.spm1.txt",TFT_string);
-	sprintf(TFT_string,"%d",TFT_pm25_u32);
-	myNex.writeStr("dl.spm25.txt",TFT_string);
-	sprintf(TFT_string,"%d",TFT_pm10_u32);
-	myNex.writeStr("dl.spm10.txt",TFT_string);
-	sprintf(TFT_string,"%d",pm25_max_u32);
-	myNex.writeStr("dl.maxpm25.txt",TFT_string);
-	sprintf(TFT_string,"%d",pm25_min_u32);
-	myNex.writeStr("dl.minpm25.txt",TFT_string);
+	myNex.writeStr("dl.spm1.txt"   , String(TFT_pm1_u32, 10) );	// ghi vao thanh phan text cua dia chi bien tren man hinh
+	myNex.writeStr("dl.spm10.txt"  , String(TFT_pm10_u32, 10));	// ghi vao thanh phan text cua dia chi bien tren man hinh
+	myNex.writeStr("dl.spm25.txt"  , String(TFT_pm25_u32, 10));	// ghi vao thanh phan text cua dia chi bien tren man hinh
+	myNex.writeStr("dl.maxpm25.txt", String(pm25_max_u32, 10));	// ghi vao thanh phan text cua dia chi bien tren man hinh
+	myNex.writeStr("dl.minpm25.txt", String(pm25_min_u32, 10));	// ghi vao thanh phan text cua dia chi bien tren man hinh
 
 }

@@ -11,23 +11,19 @@
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 
-
-
-
 //========================== Cac ham su dung ========================
-
 
 void DS3231_init();
 bool DS3231_getData();
 
 void MQTT_initClient(char* _topic, char* _espID, PubSubClient& _mqttClient);
-void MQTT_postData(float humidity,float temperature,int pm1,int pm25,int pm10,float O3);
+void MQTT_postData( float humidity,float temperature,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug,int pm25_min,int pm25_max);
 
 bool SDcard_init();
-void SDcard_getData(float humidity,float temperature,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int pm25_min, int pm25_max);
-void splitStringData(char *arrayData_pc);
+void SDcard_saveDataToFile(float humidity,float temperature,int pm1,int pm25,int pm10,int O3ppb,float O3ppm,float O3ug ,int pm25_min, int pm25_max);
+void splitStringData(char *dataSD_string);
 void SDcard_readFile();
-void SDcard_saveDataToFile();
+//void SDcard_getData();
 void SD_runProgram();
 
 void SHT_getData();
@@ -47,11 +43,24 @@ void O3_getData();
 
 bool Button_isLongPressed();
 
+#define LOG_PRINT_NONE(message)						{Serial.println(message);}
+// #ifdef DEBUG_SERIAL
+
+// 	#define DEBUG_PRINT(str)    Serial.println(str)
+// 	#define DEBUG_ASSERT(condition, str)   { if(!(condition))  Serial.println(str); }
+// 	#define DEBUG_ASSERT2(condition, str)   { if(!(condition))  Serial.println(__FILE__+__LINE__+str); }		// timer
+
+// #else
+// 	#define DEBUG_PRINT(str)  	do{} while(0);
+// 	#define DEBUG_ASSERT(condition, str) do{} while(0);
+// #endif
 
 
 //========================== Khai bao cac file code ========================
 
 #include "config.h"
+#include "log.h"
+#include "MQTTConnection.h"
 #include "SHT85Driver.h"
 #include "TFLP01Driver.h"
 #include "DS3231Driver.h"
@@ -59,9 +68,8 @@ bool Button_isLongPressed();
 #include "NextionDriver.h"
 #include "MQ131Driver.h"
 #include "ButtonDriver.h"
-#include "MQTTConnection.h"
 
-
+         
 //==========================     SETUP       ========================
 
 
@@ -79,13 +87,14 @@ void SmartConfig_Task(void * parameters)
 	{
 		if (Button_isLongPressed())
 		{
-			uint8_t wifi_connectTrialCount_u8 = 0;
+			uint8_t wifi_connectTrialCount_u8 = 0;						// bien dem so lan ket noi lai WIFI
+			// ket noi lai voi wifi
 			while (!WiFi.smartConfigDone() && wifi_connectTrialCount_u8 < WIFI_MAX_CONNECT_TRIAL)
 			{
 				Serial.println(".");
-				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;
-				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);
-				wifi_connectTrialCount_u8++;
+				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;			// cap nhat trang thai dang quet wifi
+				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);			// hien thi trang thai wifi tren man hinh
+				wifi_connectTrialCount_u8++;							// tang so lan ket noi wifi
 			}
 		}
 		vTaskDelay(TASK_DELAY);
@@ -97,13 +106,13 @@ void Wifi_checkStatus_Task(void *parameters)
 {
 	for(;;)
 	{
-		if (WiFi.status() == wl_status_t::WL_CONNECTED)
+		if (WiFi.status() == wl_status_t::WL_CONNECTED)			// kiem tra tinh trang ket noi WIFI
 		{
-			TFT_wifiStatus = WIFI_Status_et::WIFI_CONNECTED;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_CONNECTED;	// cap nhat trang thai WIFI
 		}
 		else
 		{
-			TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;	// cap nhat trang thai WIFI
 		}
 		vTaskDelay(WIFI_TASK_DELAY);
 	}
@@ -137,7 +146,7 @@ void MQTT_sendData_Task(void *parameters)
 {
 	for (;;)
 	{
-		MQTT_postData(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb);
+		MQTT_postData(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb_u32, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
 		mqttClient.loop();
 
 		vTaskDelay(MQTT_TASK_DELAY);
@@ -148,14 +157,15 @@ void SD_writeData_Task(void *parameters)
 {
 	for(;;)
 	{
-		SDcard_saveDataToFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
-		//SD_runProgram();
+		SDcard_saveDataToFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb_u32, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
+		SD_runProgram();
 
 		vTaskDelay(SD_TASK_DELAY);
 	}
 }
 
-void setup() {
+void setup()
+{
 	myNex.NextionListen();
 	Serial.begin(SERIAL_DEBUG_BAUDRATE);
 	pinMode(PIN_BUTTON_1, INPUT);
@@ -276,6 +286,7 @@ void setup() {
 
 //==========================     LOOP       ========================
 
-void loop() {
-
+void loop()
+{
+	LOG_PRINT_NONE("test");
 }

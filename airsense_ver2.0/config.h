@@ -104,3 +104,11 @@ float      max_o3_ug        = 0;
 #define MQTT_TASK_DELAY  ((TickType_t) MQTT_SENDDATA_PERIOD / portTICK_PERIOD_MS)
 #define SD_TASK_DELAY    ((TickType_t) SD_WRITEDATA_PERIOD / portTICK_PERIOD_MS)
 #define STACK_SIZE       1024
+
+
+
+
+/**
+ * sht id: 1
+ * ds3231 id: 2
+ */

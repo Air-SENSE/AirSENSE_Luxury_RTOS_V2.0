@@ -10,6 +10,7 @@
 #ifdef __cplusplus
 	extern "C"
 {
+#endif
 
 #define VERSION "2.5.1"
 #define __DATETIME__    getDateTime("hh:mm:ss/DD/MMM/YYYY ")
@@ -22,21 +23,27 @@
 #endif
 
 #ifdef DEBUG_SERIAL
-#define LOG_PRINT_NONE(message)						            {Serial.println(message);}
+#define LOG_PRINT_NOTIFICATION(message)                         {Serial.println(message);}
 
 #define LOG_PRINT_INFORMATION(format, ...)	   		            {Serial.printf(SHORT_LOG_FORMAT(INFORMATION, format), ##__VA_ARGS__);	\
-													             writeLogMessageToFile(NAME_FILE_SAVE_LOG_MESSAGE, SHORT_LOG_FORMAT(Notification, format), ##__VA_ARGS__);}
+													             writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE,                     \
+                                                                                        SHORT_LOG_FORMAT(Notification, format),         \
+                                                                                        ##__VA_ARGS__);}
+
 
 #define LOG_PRINT_ERROR(format, ...)		   		            {Serial.printf(LOG_FORMAT(ERROR, format), ##__VA_ARGS__);		 		\
-													             writeLogMessageToFile(NAME_FILE_SAVE_LOG_MESSAGE, LOG_FORMAT(Notification, format), ##__VA_ARGS__);}
+													             writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE,                     \
+                                                                                        LOG_FORMAT(Notification, format),               \
+                                                                                        ##__VA_ARGS__);}
 
-#define LOG_PRINT_ASSERT_INFOR(condition, message)	            { if(!(condition))	Serial.printf(SHORT_LOG_FORMAT(INFORMATION, message))}
-#define LOG_PRINT_ASSERT_INFOR2(condition, message1, message2)	{ if(!(condition))	Serial.printf(SHORT_LOG_FORMAT(INFORMATION, message1))\
-                                                                  else Serial.printf(SHORT_LOG_FORMAT(INFORMATION, message2))}
+#define LOG_PRINT_ASSERT_INFO(condition, message)	            { if(!(condition))	Serial.printf(SHORT_LOG_FORMAT(INFORMATION, message))}
+
+#define LOG_PRINT_ASSERT_INFO2(condition, correctMessage, notCorrectMessage)	{   if(!(condition))	Serial.printf(SHORT_LOG_FORMAT(INFORMATION, correctMessage))    \
+                                                                                    else                Serial.printf(SHORT_LOG_FORMAT(INFORMATION, notCorrectMessage))}
 
 #define LOG_PRINT_ASSERT_ERROR(condition, message)	            { if(!(condition))	Serial.printf(LOG_FORMAT(ERROR, message))}
 #else 
-#define LOG_PRINT_NONE(message)						do{} while(0)
+#define LOG_PRINT_NOTIFICATION(message)		    	do{} while(0)
 
 #define LOG_PRINT_INFORMATION(format, ...) 			do{} while(0)
 
@@ -64,16 +71,16 @@ char *getDateTime(char * buffer_string)
 
 
 /**
- * @brief Ghi cac thong tin debug vao the nho
- * @input:  const char *nameFileSaveLogMessage_string
- *          const char *format_string
- *          ...
+ * @brief       Ghi cac thong tin debug vao the nho
+ * @param[in]   const char *nameFileSaveLogMessage_string
+ *              const char *format_string
+ *              ...
  * @param nameFileSaveLogMessage_string : ten file ghi du lieu ("debug.txt")
- * @param format_string  : dinh dang chuoi ki tu ghi vao the nho
- * @param ...       : day cac doi do truyen vao (##__VA_ARGS__)
+ * @param format_string     : dinh dang chuoi ki tu ghi vao the nho
+ * @param ...               : day cac doi do truyen vao (##__VA_ARGS__)
  * 
- * @output: int writeLogMessageToFile(const char *nameFileSaveLogMessage_string, const char *format_string, ...) : ma loi
- * @return int  : ma loi
+ * @param[out] int writeLogMessageToFile(const char *nameFileSaveLogMessage_string, const char *format_string, ...) : ma loi
+ * @return  int  : ma loi
  */
 int writeLogMessageToFile(const char *nameFileSaveLogMessage_string, const char *format_string, ...)
 {
@@ -82,6 +89,8 @@ int writeLogMessageToFile(const char *nameFileSaveLogMessage_string, const char 
     writeFile = SD.open(nameFileSaveLogMessage_string, FILE_APPEND);    // mo the nho
     if (writeFile)                                                      // kiem tra tinh trang o the nho
     {
+        // char *message_string;
+        // vsprintf(message_string, format_string,);
         writeFile.printf(format_string, ##__VA_ARGS__);     // ghi tin nhan ra the nho
         writeFile.close();                                  // dong the nho
         return ERROR_NONE;
@@ -96,3 +105,4 @@ int writeLogMessageToFile(const char *nameFileSaveLogMessage_string, const char 
 
 }
 #endif
+

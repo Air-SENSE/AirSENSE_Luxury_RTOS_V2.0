@@ -43,17 +43,13 @@ void O3_getData();
 
 bool Button_isLongPressed();
 
-#define LOG_PRINT_NONE(message)						{Serial.println(message);}
-// #ifdef DEBUG_SERIAL
 
-// 	#define DEBUG_PRINT(str)    Serial.println(str)
-// 	#define DEBUG_ASSERT(condition, str)   { if(!(condition))  Serial.println(str); }
-// 	#define DEBUG_ASSERT2(condition, str)   { if(!(condition))  Serial.println(__FILE__+__LINE__+str); }		// timer
-
-// #else
-// 	#define DEBUG_PRINT(str)  	do{} while(0);
-// 	#define DEBUG_ASSERT(condition, str) do{} while(0);
-// #endif
+#define LOG_PRINT_ERROR(format, ...)
+#define LOG_PRINT_NOTIFICATION(message)
+#define LOG_PRINT_INFORMATION(format, ...)
+#define LOG_PRINT_ASSERT_INFOR(condition, message)
+#define LOG_PRINT_ASSERT_INFOR2(condition, message1, message2)
+#define LOG_PRINT_ASSERT_ERROR(condition, message)
 
 
 //========================== Khai bao cac file code ========================
@@ -288,5 +284,5 @@ void setup()
 
 void loop()
 {
-	LOG_PRINT_NONE("test");
+
 }

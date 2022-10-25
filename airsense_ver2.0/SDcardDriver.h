@@ -51,7 +51,7 @@ bool getNameFileFollowDateTime()
 {
 	if(realTime.now().isValid()) 
 	{
-		strcpy(nameFileSaveData, realTime.now().toString("YY-MMM-DD"));		// lay ten file theo ngay/thang/nam
+		strcpy(nameFileSaveData, (char*)realTime.now().toString("YY-MMM-DD"));		// lay ten file theo ngay/thang/nam
 		return true;
 	} else {
 		strcpy(nameFileSaveData, "Na-NaN-NaN");

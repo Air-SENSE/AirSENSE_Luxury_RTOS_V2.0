@@ -48,8 +48,7 @@ bool DS3231_getData()
 		return true;
 	} else {
 #ifdef  DEBUG_SERIAL
-	Serial.println("------ *** CAN'T GET TIME *** -----");
-	LOG_PRINT_ERROR()
+	LOG_PRINT_ERROR("------ *** CAN'T GET TIME *** -----");
 #endif
 		return false;
 	}

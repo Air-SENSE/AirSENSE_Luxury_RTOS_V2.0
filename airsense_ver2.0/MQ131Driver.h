@@ -1,10 +1,14 @@
 #ifdef O3_SENSOR_MQ131
 #include <MQ131.h>
 
+#define MQ131_INIT_SUCCESS   0x40
+#define MQ131_INIT_UNSUCCESS 0x41
+
 /**
  * @brief	Khoi tao module MQ131
  *
- * @return  None
+ * @return  MQ131_INIT_SUCCESS   0x40 : khoi dong sensor MQ131 thannh cong
+ * @return  MQ131_INIT_UNSUCCESS 0x41: khoi dong sensor MQ131 khong thannh cong
  */
 uint32_t O3_init()
 {
@@ -16,7 +20,9 @@ uint32_t O3_init()
 	LOG_PRINT_ERROR("Calibration done!");
 	LOG_PRINT_ERROR("R0 = "+String(MQ131.getR0())+" Ohms");
 	LOG_PRINT_ERROR("Time to heat = "+String(MQ131.getTimeToRead())+" s");
+	return MQ131_INIT_SUCCESS;		// khoi dong sensor MQ131 thannh cong
 #endif
+	return MQ131_INIT_UNSUCCESS;	// khoi dong sensor MQ131 khong thannh cong
 }
 
 
@@ -26,7 +32,7 @@ uint32_t O3_init()
  *
  * @return  None
  */
-uint32_t O3_getData()
+void O3_getData()
 {
 	TFT_o3_ppb_u32 = random(30,46);
 

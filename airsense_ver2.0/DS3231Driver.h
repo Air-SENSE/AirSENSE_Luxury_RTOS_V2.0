@@ -2,9 +2,12 @@
 #include <ESP32Ping.h>
 #include "log.h"
 
+/* DS3231 init status */
+#define DS3231_INIT_SUCCESS		0x30
+#define DS3231_INIT_UNSUCCESS	0x31
+
 const char* remote_host_string = "www.google.com";
 RTC_DS3231 realTime;
-
 
 /**
  * @brief	Khoi tao module thoi gian thuc
@@ -22,9 +25,11 @@ void DS3231_init()
 			timeClient.update();				
 			uint32_t epochTime_u32 = timeClient.getEpochTime();
 			realTime.adjust(DateTime(epochTime_u32));			// Set the date and flip the Oscillator Stop Flag
-			Serial.println("Updatetime DS3231....");
+			LOG_PRINT_NOTIFICATION("Updatetime DS3231....");
+			return DS3231_INIT_SUCCESS;					// Khoi tao DS3231 thaanh cong
 		}
 	}
+	return DS3231_INIT_UNSUCCESS;						// Khoi tao DS3231 khong thanh cong
 	//LOG_PRINT_NONE(realTime.now().toString("YYYY-MMM-DD hh:mm:ss"));
 //#ifdef	DEBUG_SERIAL
 //	Serial.println(realTime.now().toString("YYYY-MMM-DD hh:mm:ss")); 		// in thoi gian hien tai ra Serial
@@ -43,7 +48,7 @@ bool DS3231_getData()
 	if (realTime.now().isValid())		// kiem tra thoi gian co hop le
 	{
 #ifdef  DEBUG_SERIAL
-	Serial.println(realTime.now().toString("hh:mm DD-MMM-YY"));		// in thoi gian hien tai ra Serial
+	LOG_PRINT_NOTIFICATION(getDateTime("hh:mm DD-MMM-YY"));		// in thoi gian hien tai ra Serial
 #endif
 		return true;
 	} else {

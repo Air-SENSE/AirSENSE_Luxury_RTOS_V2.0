@@ -22,9 +22,9 @@ uint32_t O3_init()
 	LOG_PRINT_NOTIFICATION("Time to heat = "+String(MQ131.getTimeToRead())+" s");
 #endif
 	if(MQ131.getO3(MQ131Unit::PPB) != 0.0)	// kiem tra co gia tri Rs duoc doc(read) khong
-		return MQ131_INIT_SUCCESS;		// khoi dong sensor MQ131 thannh cong
+		return MQ131_INIT_SUCCESS;			// khoi dong sensor MQ131 thannh cong
 	else
-		return MQ131_INIT_UNSUCCESS;	// khoi dong sensor MQ131 khong thannh cong
+		return MQ131_INIT_UNSUCCESS;		// khoi dong sensor MQ131 khong thannh cong
 }
 
 

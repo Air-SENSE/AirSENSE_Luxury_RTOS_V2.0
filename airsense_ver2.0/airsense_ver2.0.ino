@@ -26,8 +26,8 @@ void SDcard_readFile();
 //void SDcard_getData();
 void SD_runProgram();
 
-void SHT_getData();
-void SHT_init();
+uint32_t SHT_getData();
+uint32_t SHT_init();
 
 void TFLP01_getData();
 void TFLP01_init();
@@ -35,29 +35,38 @@ void TFLP01_init();
 void Screen_init();
 void Screen_saveCalibDataToSDcard();
 void Screen_getCalibData();
-void Screen_displayData();
+uint32_t Screen_displaysensorData(struct sensorData *_sensorData_st);
 void Screen_displayCalibData();
 
 void O3_init();
-void O3_getData();
+uint32_t O3_getData(struct sensorData *_sensorData_st)
 
 bool Button_isLongPressed();
+
+
+#define LOG_PRINT_ERROR(format, ...)
+#define LOG_PRINT_NOTIFICATION(message)
+#define LOG_PRINT_INFORMATION(format, ...)
+#define LOG_PRINT_ASSERT_INFOR(condition, message)
+#define LOG_PRINT_ASSERT_INFOR2(condition, message1, message2)
+#define LOG_PRINT_ASSERT_ERROR(condition, message)
 
 
 //========================== Khai bao cac file code ========================
 
 #include "config.h"
+#include "log.h"
 #include "MQTTConnection.h"
-
-#include "SHT85Driver.h"
+#include "SHT85Sensor.h"
 #include "TFLP01Driver.h"
 #include "DS3231Driver.h"
-#include "SDcardDriver.h"
-#include "NextionDriver.h"
+#include "file.h"
+#include "ui.h"
 #include "MQ131Driver.h"
+#include "DFRobotO3.h"
 #include "ButtonDriver.h"
 
-
+         
 //==========================     SETUP       ========================
 
 
@@ -75,14 +84,14 @@ void SmartConfig_Task(void * parameters)
 	{
 		if (Button_isLongPressed())
 		{
-			uint8_t wifi_connectTrialCount_u8 = 0;
+			uint8_t wifi_connectTrialCount_u8 = 0;						// bien dem so lan ket noi lai WIFI
 			// ket noi lai voi wifi
 			while (!WiFi.smartConfigDone() && wifi_connectTrialCount_u8 < WIFI_MAX_CONNECT_TRIAL)
 			{
 				Serial.println(".");
-				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;			// dang quet wifi
-				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);			//  hien thi trang thai wifi tren man hinh
-				wifi_connectTrialCount_u8++;
+				TFT_wifiStatus = WIFI_Status_et::WIFI_SCANNING;			// cap nhat trang thai dang quet wifi
+				myNex.writeNum("dl.wifi.val", TFT_wifiStatus);			// hien thi trang thai wifi tren man hinh
+				wifi_connectTrialCount_u8++;							// tang so lan ket noi wifi
 			}
 		}
 		vTaskDelay(TASK_DELAY);
@@ -94,13 +103,13 @@ void Wifi_checkStatus_Task(void *parameters)
 {
 	for(;;)
 	{
-		if (WiFi.status() == wl_status_t::WL_CONNECTED)
+		if (WiFi.status() == wl_status_t::WL_CONNECTED)			// kiem tra tinh trang ket noi WIFI
 		{
-			TFT_wifiStatus = WIFI_Status_et::WIFI_CONNECTED;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_CONNECTED;	// cap nhat trang thai WIFI
 		}
 		else
 		{
-			TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;
+			TFT_wifiStatus = WIFI_Status_et::WIFI_DISCONNECT;	// cap nhat trang thai WIFI
 		}
 		vTaskDelay(WIFI_TASK_DELAY);
 	}
@@ -114,7 +123,10 @@ void Sensors_getData_Task(void *parameters)
 			O3_getData();
 		#endif
 		
-		SHT_getData();
+		SHT_getData(temperature_calibInt_u16,
+					humidity_calibInt_u16,
+					&TFT_temperature_C,
+					&TFT_humidity_percent);
 		TFLP01_getData();
 		DS3231_getData();
 		vTaskDelay(TASK_DELAY);
@@ -146,19 +158,20 @@ void SD_writeData_Task(void *parameters)
 	for(;;)
 	{
 		SDcard_saveDataToFile(TFT_humidity_percent, TFT_temperature_C, TFT_pm1_u32, TFT_pm25_u32, TFT_pm10_u32, TFT_o3_ppb_u32, TFT_o3_ppm, TFT_o3_ug, pm25_min_u32, pm25_max_u32);
-		//SD_runProgram();
+		SD_runProgram();
 
 		vTaskDelay(SD_TASK_DELAY);
 	}
 }
 
-void setup() {
+void setup()
+{
 	myNex.NextionListen();
 	Serial.begin(SERIAL_DEBUG_BAUDRATE);
 	pinMode(PIN_BUTTON_1, INPUT);
 	Wire.begin(PIN_SDA_GPIO, PIN_SCL_GPIO, I2C_CLOCK_SPEED);
 	WiFi.begin();
-	WiFi.macAddress(MacAddress);
+	//WiFi.macAddress(MacAddress);
 
 
 	// khoi tao cac cam bien
@@ -273,6 +286,54 @@ void setup() {
 
 //==========================     LOOP       ========================
 
-void loop() {
+void loop()
+{
 
+}
+
+
+
+/**
+ * @brief	Luu tru cac gia tri da calib tu man hinh vao the nho
+ *
+ * @return  None
+ */
+void Screen_saveCalibDataToSDcard()
+{
+	if (checkDataValid())
+	{
+#ifdef DEBUG_SERIAL
+		Serial.println("----- *** Don't write to SD card *** ----");			// in ra Serail
+#endif
+	}
+	else
+	{
+		File writeFile;
+		writeFile = SD.open(fileNameCalib, FILE_APPEND);
+		if(writeFile)		// kiem tra mo file co thanh cong
+		{
+			// tao chuoi string theo cau truc: temperature|humidity|PM1.0|PM2.5|PM10|temperature_float|humidity_float
+			char message[256] = {0};
+			sprintf(message,"%u|%u|%u|%u|%u|%u|%u\n", temperature_calibInt_u16,   
+													  humidity_calibInt_u16,  
+													  pm1_calibInt_u32,
+													  pm10_calibInt_u32,
+													  pm25_calibInt_u32,
+													  temperature_calibFloat_u16,
+													  humidity_calibFloat_u16 );
+
+#ifdef DEBUG_SERIAL
+			Serial.print("Message: ");
+			Serial.println(message);							// in du lieu duoc tao ben tren ra Serial
+#endif
+			TFT_SDStatus = SD_Status_et::SD_CONNECTED;			// cap nhat trang thai the nho
+			writeFile.println(message);        					// ghi du lieu ra the nho
+			writeFile.close();										// dong the nho
+		}
+		else
+		{
+			Serial.println("Reconnect SD.");
+			SDcard_init();										// khoi dong lai the nho
+		}
+	}
 }

@@ -1,11 +1,20 @@
+/**
+ * @file TFLP01Driver.h
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-11
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #pragma once
 
 #if(defined(PIN_TX_TFLP01) && defined(PIN_RX_TFLP01))
 
 #include "config.h"
 
-#define TFLP01_SERIAL_PORT_BAUDRATE 115200
-#define TFLP01_SERIAL_PORT Serial2
 
 #define ERROR_TFLP01_INIT_FAILED 0x21
 #define ERROR_TFLP01_READ_DATA_FAILED 0x22
@@ -37,16 +46,16 @@
  *
  * @return  ERROR_CODE
  */
-uint32_t TFLP01_init(const uint32 baudRate_u32 = 115200)
+ERROR_CODE TFLP01_init(HardwareSerial& _stream, uint32_t baudRate_u32)
 {
-	TFLP01_SERIAL_PORT.begin(baudRate_u32);
-	if (TFLP01_SERIAL_PORT.available() > 0)
+	_stream.begin(baudRate_u32);
+	if (_stream.available() > 0)
 	{
-		connectionStatus_st.TFLP01Sensor = CONNECTED;
+		connectionStatus_st.tflp01Sensor = status_et::CONNECTED;
 		LOG_PRINT_INFORMATION("TFLP01 Sensor initialized successfully!");
 		return ERROR_NONE;
 	} else {
-		connectionStatus_st.TFLP01Sensor = DISCONNECTED;
+		connectionStatus_st.tflp01Sensor = status_et::DISCONNECTED;
 		LOG_PRINT_INFORMATION("TFLP01 Sensor initialized failed!");
 		return ERROR_TFLP01_INIT_FAILED;
 	}
@@ -60,7 +69,7 @@ uint32_t TFLP01_init(const uint32 baudRate_u32 = 115200)
  * 
  * @return ERROR_CODE 
  */
-uint32_t TFLP01_readRawData(uint8_t *dataArray,const size_t lenght)
+ERROR_CODE TFLP01_readRawData(uint8_t *dataArray, size_t lenght)
 {
 	LOG_PRINT_NOTIFICATION("TFLP01 Sensor send read request...");
 	lenght = (lenght > 17) ? 17 : lenght;
@@ -86,7 +95,7 @@ uint32_t TFLP01_readRawData(uint8_t *dataArray,const size_t lenght)
  * 
  * @return  ERROR_CODE
  */
-uint32_t TFLP01_getData(struct sensorData *_sensorData_st, struct calibData *_calibData)
+ERROR_CODE TFLP01_getData(struct sensorData *_sensorData_st, struct calibData *_calibData)
 {
 	uint8_t TFLP01_data_arr[17] = {0};
 	// lay du lieu tam thoi (chua co datasheet)
@@ -99,13 +108,13 @@ uint32_t TFLP01_getData(struct sensorData *_sensorData_st, struct calibData *_ca
 		if(_sensorData_st->pm25_u32 != 255)
 		{
 			_sensorData_st->pm25_max_u32 = (_sensorData_st->pm25_u32 > _sensorData_st->pm25_max_u32) ? _sensorData_st->pm25_u32 : _sensorData_st->pm25_max_u32;
-			_sensorData_st->pm25_min_u32 = (_sensorData_st->pm25_u32 < _sensorData_st->pm25_min_u32) ? _sensorData_st->pm25_u32 : _sensorData_st->pm25_in_u32;
+			_sensorData_st->pm25_min_u32 = (_sensorData_st->pm25_u32 < _sensorData_st->pm25_min_u32) ? _sensorData_st->pm25_u32 : _sensorData_st->pm25_min_u32;
 		}
 
 		LOG_PRINT_INFORMATION("PM1.0: %u", _sensorData_st->pm1_u32 );
 		LOG_PRINT_INFORMATION("PM2.5: %u", _sensorData_st->pm25_u32 );
 		LOG_PRINT_INFORMATION("PM10.0: %u", _sensorData_st->pm10_u32 );
-		return ERROR_NONE
+		return ERROR_NONE;
 	} else {
 		LOG_PRINT_INFORMATION("TFLP01 Sensor read data failed!");
 		return ERROR_TFLP01_READ_DATA_FAILED;

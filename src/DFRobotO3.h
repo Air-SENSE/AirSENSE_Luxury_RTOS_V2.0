@@ -1,3 +1,14 @@
+/**
+ * @file DFRobotO3.h
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-11
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #pragma once
 #ifdef O3_SENSOR_DF_ROBOT
 #include "DFRobot_OzoneSensor.h"
@@ -23,12 +34,12 @@ DFRobot_OzoneSensor Ozone;
  *
  * @return  ERROR_CODE
  */
-uint32_t O3_init()
+ERROR_CODE DFRobotO3_init()
 {
 	if(Ozone.begin(Ozone_IICAddress)) 
 	{
 		LOG_PRINT_INFORMATION("I2c connect success !");
-		Ozone.SetModes(MEASURE_MODE_PASSIVE);
+		Ozone.setModes(MEASURE_MODE_PASSIVE);
 		return ERROR_NONE;
 	}  else {
 		LOG_PRINT_INFORMATION("I2c device number error !");
@@ -43,7 +54,7 @@ uint32_t O3_init()
  * @param[out] _sensorData_st pointer to struct data sensor
  * @return  ERROR_CODE
  */
-uint32_t O3_getData(struct sensorData *_sensorData_st)
+ERROR_CODE DFRobotO3_getData(struct sensorData *_sensorData_st)
 {
 	uint32_t o3_ppb_temp = Ozone.readOzoneData(COLLECT_NUMBER);
 	if (o3_ppb_temp > 0)

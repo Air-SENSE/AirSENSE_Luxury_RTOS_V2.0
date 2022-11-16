@@ -37,7 +37,7 @@ char espID[10];
 ERROR_CODE MQTT_initClient( char*			 		_topic,
 					 	 	char*			 		_espID,
 					 	 	PubSubClient& 	 		_mqttClient,
-						 	struct connectionStatus _connecctionStatus)
+						 	struct connectionStatus *_connectionStatus)
 {
 	uint8_t espMacAddress[6];				// mang luu dia chi MAC
 	WiFi.macAddress(espMacAddress);			// lay dia chi MAC cua WIFI
@@ -53,12 +53,12 @@ ERROR_CODE MQTT_initClient( char*			 		_topic,
 		LOG_PRINT_INFORMATION("Topic: %s.", _topic);
 		LOG_PRINT_INFORMATION("ID: %s.", _espID);
 		_mqttClient.subscribe(_topic);
-		_connecctionStatus.mqttConnection = status_et::CONNECTED;
+		_connectionStatus->mqttConnection = status_et::CONNECTED;
 		LOG_PRINT_INFORMATION("MQTT initialized successfully!");
 		return ERROR_NONE;
 	} else {
 		LOG_PRINT_INFORMATION("MQTT initialized failed!");
-		_connecctionStatus.mqttConnection = status_et::DISCONNECTED;
+		_connectionStatus->mqttConnection = status_et::DISCONNECTED;
 		LOG_PRINT_INFORMATION("MQTT initialized failed!");
 		return ERROR_MQTT_INIT_FAILED;
 	}
@@ -76,30 +76,30 @@ ERROR_CODE MQTT_initClient( char*			 		_topic,
  * @return  ERROR_CODE
  */
 ERROR_CODE MQTT_postData(const char *_message,
-					     struct connectionStatus 	*_connecctionStatus,
+					     struct connectionStatus 	*_connectionStatus,
 					     PubSubClient&  			_mqttClient)
 {
-	if (_connecctionStatus->wifiStatus == status_et::CONNECTED)
+	if (_connectionStatus->wifiStatus == status_et::CONNECTED)
 	{
 		if (_mqttClient.connected())
 		{
-			_connecctionStatus->mqttConnection = status_et::SENDING_DATA;
+			_connectionStatus->mqttConnection = status_et::SENDING_DATA;
 
 			if (_mqttClient.publish(topic, _message, true))	// kiem tra co gui dulieu len MQTT thanh cong
 			{
 				LOG_PRINT_INFORMATION("%s.", _message);
-				_connecctionStatus->mqttConnection = status_et::CONNECTED;
+				_connectionStatus->mqttConnection = status_et::CONNECTED;
 				_mqttClient.loop();
 				LOG_PRINT_INFORMATION("MQTT send data successfully!");
 				return ERROR_NONE;
 			} else {
-				_connecctionStatus->mqttConnection = status_et::DISCONNECTED;
+				_connectionStatus->mqttConnection = status_et::DISCONNECTED;
 				LOG_PRINT_INFORMATION("MQTT post data failed!");
 				return ERROR_MQTT_POST_DATA_FAILED;
 			}
 
 		} else {
-			_connecctionStatus->mqttConnection = status_et::DISCONNECTED;
+			_connectionStatus->mqttConnection = status_et::DISCONNECTED;
 			LOG_PRINT_INFORMATION("MQTT post data failed!");
 			return ERROR_MQTT_POST_DATA_FAILED;
 		}

@@ -14,7 +14,7 @@
 #if(defined(PIN_TX_TFLP01) && defined(PIN_RX_TFLP01))
 
 #include "config.h"
-
+#include "DeviceManager.h"
 
 #define ERROR_TFLP01_INIT_FAILED 0x21
 #define ERROR_TFLP01_READ_DATA_FAILED 0x22
@@ -46,16 +46,16 @@
  *
  * @return  ERROR_CODE
  */
-ERROR_CODE TFLP01_init(HardwareSerial& _stream, uint32_t baudRate_u32)
+ERROR_CODE TFLP01_init(HardwareSerial& _stream, uint32_t baudRate_u32, struct connectionStatus *connectionStatus_st)
 {
 	_stream.begin(baudRate_u32);
 	if (_stream.available() > 0)
 	{
-		connectionStatus_st.tflp01Sensor = status_et::CONNECTED;
+		connectionStatus_st->tflp01Sensor = status_et::CONNECTED;
 		LOG_PRINT_INFORMATION("TFLP01 Sensor initialized successfully!");
 		return ERROR_NONE;
 	} else {
-		connectionStatus_st.tflp01Sensor = status_et::DISCONNECTED;
+		connectionStatus_st->tflp01Sensor = status_et::DISCONNECTED;
 		LOG_PRINT_INFORMATION("TFLP01 Sensor initialized failed!");
 		return ERROR_TFLP01_INIT_FAILED;
 	}

@@ -27,37 +27,18 @@
 #define ERROR_SENSOR_ALL_DISCONNECTED   0xc2
 #define ERROR_SENSOR_INIT_FAILED        0xc3
 
-typedef enum 
-{
-    DISCONNECTED,
-    CONNECTED,
-    CONNECTION_LOST,
-    SCANNING,
-    SENDING_DATA,
-    READING_DATA,
-    WRITING_DATA
-} status_et;
 
 
-struct connectionStatus
-{
-    status_et wifiStatus;
-    status_et sdCardStatus;
-    status_et mqttConnection;
-    status_et ds3231Module;
-    status_et tflp01Sensor;
-    status_et dfrobotO3Sensor;
-    status_et shtSensor;
-    status_et mq131Sensor;
-} connectionStatus_st;
+struct connectionStatus connectionStatus_st;
+
 
 ERROR_CODE initAllSensor()
 {
     if ((SHT_init(Wire) == ERROR_NONE)                                               &&
-        (TFLP01_init(TFLP01_SERIAL_PORT, TFLP01_SERIAL_PORT_BAUDRATE) == ERROR_NONE) ||
+        (TFLP01_init(TFLP01_SERIAL_PORT, TFLP01_SERIAL_PORT_BAUDRATE, &connectionStatus_st) == ERROR_NONE) ||
         (DFRobotO3_init() == ERROR_NONE)                                             &&
         (MQ131Sensor_init() == ERROR_NONE)                                           &&
-        (Button_init(PIN_BUTTON_1, INPUT) == ERROR_NONE))
+        (Button_init(PIN_BUTTON_1, INPUT, 1) == ERROR_NONE))
     {
         return ERROR_NONE;
     } else {
@@ -71,7 +52,7 @@ ERROR_CODE initAllSensor()
  * @param _statusDevice 
  * @return ERROR_CODE 
  */
-ERROR_CODE isSensorDisconnected(struct status_et _statusDevice)
+ERROR_CODE isSensorDisconnected(status_et _statusDevice)
 {
     if (_statusDevice == status_et::DISCONNECTED)
     {
@@ -90,10 +71,10 @@ ERROR_CODE isSensorDisconnected(struct status_et _statusDevice)
  */
 ERROR_CODE isAllSensorDisconnected(struct connectionStatus _connectionStatus)
 {
-    if (isDeviceDisconnected(_connectionStatus.shtSensor)       == ERROR_SENSOR_DISCONNECTED  &&
-        isDeviceDisconnected(_connectionStatus.mq131Sensor)     == ERROR_SENSOR_DISCONNECTED  &&
-        isDeviceDisconnected(_connectionStatus.dfrobotO3Sensor) == ERROR_SENSOR_DISCONNECTED  &&
-        isDeviceDisconnected(_connectionStatus.tflp01Sensor)    == ERROR_SENSOR_DISCONNECTED )
+    if (isSensorDisconnected(_connectionStatus.shtSensor)       == ERROR_SENSOR_DISCONNECTED  &&
+        isSensorDisconnected(_connectionStatus.mq131Sensor)     == ERROR_SENSOR_DISCONNECTED  &&
+        isSensorDisconnected(_connectionStatus.dfrobotO3Sensor) == ERROR_SENSOR_DISCONNECTED  &&
+        isSensorDisconnected(_connectionStatus.tflp01Sensor)    == ERROR_SENSOR_DISCONNECTED )
     {
         LOG_PRINT_INFORMATION("All sensors disconnected");
         return ERROR_SENSOR_ALL_DISCONNECTED;

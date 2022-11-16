@@ -16,14 +16,14 @@
 #define DEBUG_SERIAL_PORT       Serial
 #define USING_SDCARD
 #define USING_MQTT
-#define SERIAL_DEBUG_BAUDRATE   115200
+#define SERIAL_DEBUG_BAUDRATE   9600
 
 //========================== DEFINE O3 SENSOR ========================
 
 // #define SSID
 // #define PASSWORD
 
-#define TFLP01_SERIAL_PORT_BAUDRATE 115200
+#define TFLP01_SERIAL_PORT_BAUDRATE 115200U
 #define TFLP01_SERIAL_PORT Serial2
 
 #define O3_SENSOR_DF_ROBOT
@@ -88,17 +88,43 @@
 #define SD_WRITEDATA_PERIOD		    (uint32_t)10000
 #define WIFI_RECONNECT_PERIOD	    (uint32_t)6000
 #define BUTTON_PRESSED_DURATION 	(uint32_t)4000
-#define WIFI_MAX_CONNECT_TRIAL      (uint8_t)10
+#define WIFI_MAX_CONNECT_TRIAL      (uint8_t)100
 
-
+#define TICK_TO_WAIT     ((TickType_t) 0 / portTICK_PERIOD_MS)
+#define SAMPLING_PERIOD  ((TickType_t) 5000 / portTICK_PERIOD_MS)
 #define BUTTON_PRESS_DURATION	((TickType_t) 3000 / portTICK_PERIOD_MS)
-#define TASK_DELAY       ((TickType_t) 1000 / portTICK_PERIOD_MS)
-#define WIFI_TASK_DELAY  ((TickType_t) WIFI_RECONNECT_PERIOD / portTICK_PERIOD_MS)
-#define MQTT_TASK_DELAY  ((TickType_t) MQTT_SENDDATA_PERIOD / portTICK_PERIOD_MS)
-#define SD_TASK_DELAY    ((TickType_t) SD_WRITEDATA_PERIOD / portTICK_PERIOD_MS)
+// #define TASK_DELAY       ((TickType_t) 1000 / portTICK_PERIOD_MS)
+// #define WIFI_TASK_DELAY  ((TickType_t) WIFI_RECONNECT_PERIOD / portTICK_PERIOD_MS)
+// #define MQTT_TASK_DELAY  ((TickType_t) MQTT_SENDDATA_PERIOD / portTICK_PERIOD_MS)
+// #define SD_TASK_DELAY    ((TickType_t) SD_WRITEDATA_PERIOD / portTICK_PERIOD_MS)
 #define STACK_SIZE       ((1024U) * 10)     // byte
+
+enum status_et
+{
+    DISCONNECTED,
+    CONNECTED,
+    CONNECTION_LOST,
+    SCANNING,
+    SENDING_DATA,
+    READING_DATA,
+    WRITING_DATA
+};
+
+struct connectionStatus
+{
+    status_et wifiStatus;
+    status_et sdCardStatus;
+    status_et mqttConnection;
+    status_et ds3231Module;
+    status_et tflp01Sensor;
+    status_et dfrobotO3Sensor;
+    status_et shtSensor;
+    status_et mq131Sensor;
+};
 
 
 char dateTime_string[25];
+char dataCalib_string[50];
+char sensorDataString[64];
 String messageData;
 

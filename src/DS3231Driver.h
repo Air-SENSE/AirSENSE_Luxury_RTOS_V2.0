@@ -13,6 +13,7 @@
 #include "RTClib.h"
 #include <ESP32Ping.h>
 #include "MQTTConnection.h"
+#include "DeviceManager.h"
 #include "log.h"
 
 const char* remote_host_string = "www.google.com";

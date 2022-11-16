@@ -61,7 +61,7 @@ ERROR_CODE SHT_init(TwoWire &wire)
  * 
  * @return ERROR_CODE
  */
-ERROR_CODE SHT_getData( struct connectionStatus _connectionStatus,
+ERROR_CODE SHT_getData( struct connectionStatus &_connectionStatus,
 						const uint16_t temperature_calibInt_u16,
 					 	const uint16_t humidity_calibInt_u16,
 					 	float *temperature,
@@ -71,6 +71,7 @@ ERROR_CODE SHT_getData( struct connectionStatus _connectionStatus,
 	float SHT_humidity;
 	if (sht.readSample())		// kiem tra tinh trang du lieu co the doc hay chua
 	{
+		_connectionStatus.shtSensor = status_et::CONNECTED;
 		SHT_temperature = sht.getTemperature() +  temperature_calibInt_u16;				// lay du lieu nhiet do tu cam bien va calibration
 		SHT_humidity 	= sht.getHumidity()	   +  humidity_calibInt_u16;				// lay du lieu do am tu cam bien va calibration
 		LOG_PRINT_INFORMATION("Temperature = %f", SHT_temperature);
@@ -78,6 +79,7 @@ ERROR_CODE SHT_getData( struct connectionStatus _connectionStatus,
 	}
 	else
 	{
+		_connectionStatus.shtSensor = status_et::DISCONNECTED;
 		LOG_PRINT_ERROR("Fail to read data.");
 		return ERROR_SHT_READ_DATA_FAILED;
 	}

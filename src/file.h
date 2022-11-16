@@ -12,6 +12,7 @@
 #pragma once
 
 #include <stdarg.h>
+#include "DeviceManager.h"
 #include <SD.h>
 
 const char fileNameCalib[] = "calib.txt";			// file chua cac gia tri calib
@@ -38,20 +39,20 @@ ERROR_CODE SDcard_init(uint8_t _pinSCK,
 					   uint8_t _pinMISO,
 					   uint8_t _pinMOSI,
 					   uint8_t _pinCS,
-					   struct connectionStatus *_connecctionStatus)
+					   struct connectionStatus *_connectionStatus)
 {
 	SPI.begin(_pinSCK, _pinMISO, _pinMOSI, _pinCS);
 	pinMode(SS, OUTPUT);
 
 	if (SD.begin(_pinCS))
 	{
-		_connecctionStatus->sdCardStatus = status_et::CONNECTED;
+		_connectionStatus->sdCardStatus = status_et::CONNECTED;
 		LOG_PRINT_INFORMATION("SD init success.");
 		return ERROR_NONE;
 	}
 	else
 	{
-		_connecctionStatus->sdCardStatus = status_et::DISCONNECTED;
+		_connectionStatus->sdCardStatus = status_et::DISCONNECTED;
 		LOG_PRINT_INFORMATION("SD init false.");
 		return ERROR_SD_CARD_INIT_FAILED;		
 	}
@@ -96,6 +97,7 @@ ERROR_CODE SDcard_readFile( const char *fileName_string,
 /**
  * @brief 
  * 
+ * @param[in]   _connectionStatus: struct connection Status
  * @param[in]   _nameFile: name file save calibdata
  * @param[in]   _format: format store data in file
  * @param[out]  __VA_ARGS__ List argument (pointer)
@@ -126,7 +128,7 @@ ERROR_CODE SDcard_readCalibDataFromFile(struct connectionStatus *_connectStatus,
 			va_end(argumentsList);
 
 			readFile.close();
-			_connectStatus->sdCardStatus = status_et::CONNECTED
+			_connectStatus->sdCardStatus = status_et::CONNECTED;
 			LOG_PRINT_INFORMATION("SD card read calibrate data successfully!");
 			return ERROR_NONE;
 		} else {
@@ -146,19 +148,15 @@ ERROR_CODE SDcard_readCalibDataFromFile(struct connectionStatus *_connectStatus,
  * @brief Save sensor data to SDcard
  * 
  * @param[in] fileContent_string: string save to file
- * @param[in] _sensorData_st: struct sensor data
  * @param[in] _connecctionStatus: pointer to struct store all connection status
  * @return ERROR_CODE 
  */
 ERROR_CODE SDcard_saveStringDataToFile( struct connectionStatus *_connectStatus,
-										const char *fileContent_string,
-								 		struct sensorData  _sensorData_st,
-					   	   		 		struct connectionStatus *_connecctionStatus)
+										const char *fileContent_string)
 {
 	if (_connectStatus->sdCardStatus == status_et::CONNECTED)
 	{
 		File writeFile;
-
 		writeFile = SD.open(nameFileSaveData, FILE_APPEND);		// mo file de ghi du lieu
 		if (writeFile)											// kiem tra trang thai mo file co thanh cong
 		{

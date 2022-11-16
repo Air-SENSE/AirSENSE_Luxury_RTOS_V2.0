@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <Arduino.h>
 #include <ArduinoJson.h>
 #include "config.h"
 #include <string>
@@ -39,6 +40,7 @@ struct calibData {
 
 calibData calibData_st;
 
+
 /**
  * @brief Create a string
  * 
@@ -66,7 +68,6 @@ ERROR_CODE creatCalibDataString(char *_calibDataString, struct calibData _calibD
 		return ERROR_NONE;
 	}
 }
-
 
 
 struct sensorData {
@@ -106,6 +107,60 @@ struct sensorData {
         this->o3_ppm_max      = 0;
         this->o3_ug_max       = 0;
     };
+
+    sensorData(QueueHandle_t queue1, QueueHandle_t queue2, QueueHandle_t queue3)
+    {
+        if (uxQueueSpacesAvailable(queue1))
+        {
+            xQueueReceive(queue1, (void *)&(this->humidity   ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->temperature), TICK_TO_WAIT);
+        }
+        
+        if (uxQueueSpacesAvailable(queue2))
+        {
+            xQueueReceive(queue1, (void *)&(this->pm1_u32     ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->pm25_u32    ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->pm10_u32    ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->pm25_min_u32), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->pm25_max_u32), TICK_TO_WAIT);
+        }
+
+        if (uxQueueSpacesAvailable(queue3))
+        {
+            xQueueReceive(queue1, (void *)&(this->o3_ppb     ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ppm     ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ug      ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ppb_min ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ppm_min ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ug_min  ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ppb_max ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ppm_max ), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->o3_ug_max  ), TICK_TO_WAIT);
+        }
+        
+    }
+
+    sensorData operator=(const sensorData _sensorData_temp)
+    {
+        this->temperature	 = _sensorData_temp.temperature;
+        this->humidity		 = _sensorData_temp.humidity;
+        this->pm1_u32        = _sensorData_temp.pm1_u32;
+        this->pm25_u32       = _sensorData_temp.pm25_u32;
+        this->pm10_u32       = _sensorData_temp.pm10_u32;
+        this->pm25_min_u32   = _sensorData_temp.pm25_min_u32;
+        this->pm25_max_u32   = _sensorData_temp.pm25_max_u32;
+        this->o3_ppb         = _sensorData_temp.o3_ppb;
+        this->o3_ppm         = _sensorData_temp.o3_ppm;
+        this->o3_ug          = _sensorData_temp.o3_ug;
+        this->o3_ppb_min     = _sensorData_temp.o3_ppb_min;
+        this->o3_ppm_min     = _sensorData_temp.o3_ppm_min;
+        this->o3_ug_min      = _sensorData_temp.o3_ug_min;
+        this->o3_ppb_max     = _sensorData_temp.o3_ppb_max;
+        this->o3_ppm_max     = _sensorData_temp.o3_ppm_max;
+        this->o3_ug_max      = _sensorData_temp.o3_ug_max;
+
+        return _sensorData_temp;
+    }
 };
 
 struct sensorData sensorData_st;
@@ -175,4 +230,5 @@ ERROR_CODE createMessageMQTTString( String &messageMQTTString,
 
     return ERROR_NONE;
 }
+
 

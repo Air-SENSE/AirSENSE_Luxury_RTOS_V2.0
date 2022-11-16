@@ -11,6 +11,9 @@
 
 #pragma once
 #ifdef O3_SENSOR_MQ131
+
+#include "config.h"
+#include "DeviceManager.h"
 #include <MQ131.h>
 
 #define ERROR_MQ131_INIT_FAILED		 0x61

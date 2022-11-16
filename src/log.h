@@ -41,11 +41,13 @@
 #define NAME_FILE_SAVE_LOG_MESSAGE "debug.txt"
 
 #define LOG_PRINT_INFORMATION(format, ...)	   		            {DEBUG_SERIAL_PORT.printf(SHORT_LOG_FORMAT(INFO, format), ##__VA_ARGS__);	\
-                                                                 writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE, connectionStatus_st, SHORT_LOG_FORMAT(INFO, format), ##__VA_ARGS__);}
+                                                                 //writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE, connectionStatus_st, SHORT_LOG_FORMAT(INFO, format), ##__VA_ARGS__);\
+                                                                }
 
 
 #define LOG_PRINT_ERROR(format, ...)		   		            {DEBUG_SERIAL_PORT.printf(LONG_LOG_FORMAT(ERR, format), ##__VA_ARGS__);	\
-													             writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE, connectionStatus_st, LONG_LOG_FORMAT(ERROR, format), ##__VA_ARGS__);}
+													             //writeLogMessageToFile( NAME_FILE_SAVE_LOG_MESSAGE, connectionStatus_st, LONG_LOG_FORMAT(ERROR, format), ##__VA_ARGS__);\
+                                                                }
 
 #else
 #define LOG_PRINT_INFORMATION(format, ...)	   		            {DEBUG_SERIAL_PORT.printf(SHORT_LOG_FORMAT(INFO, format), ##__VA_ARGS__);}

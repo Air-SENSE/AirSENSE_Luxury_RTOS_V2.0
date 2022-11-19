@@ -27,7 +27,7 @@ struct calibData {
     uint32_t temperature_calibFloat_u32;
     uint32_t humidity_calibFloat_u32;
 
-    calibData() {
+    calibData() {     // initialation function for struct (C++ style)
         this->temperature_calibInt_u32      = 0;
         this->humidity_calibInt_u32         = 0;
         this->pm1_calibInt_u32              = 0;
@@ -42,7 +42,7 @@ calibData calibData_st;
 
 
 /**
- * @brief Create a string
+ * @brief Create a string from sensor data for storing in the SD card
  * 
  * @param[out] _calibDataString: pointer char*, use to store string
  * @param[in]  _calibData: struct calibdata
@@ -112,30 +112,30 @@ struct sensorData {
     {
         if (uxQueueSpacesAvailable(queue1))
         {
-            xQueueReceive(queue1, (void *)&(this->humidity   ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->temperature), TICK_TO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->humidity   ), NO_WAIT);
+            xQueueReceive(queue1, (void *)&(this->temperature), NO_WAIT);
         }
         
         if (uxQueueSpacesAvailable(queue2))
         {
-            xQueueReceive(queue1, (void *)&(this->pm1_u32     ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->pm25_u32    ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->pm10_u32    ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->pm25_min_u32), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->pm25_max_u32), TICK_TO_WAIT);
+            xQueueReceive(queue2, (void *)&(this->pm1_u32     ), NO_WAIT);
+            xQueueReceive(queue2, (void *)&(this->pm25_u32    ), NO_WAIT);
+            xQueueReceive(queue2, (void *)&(this->pm10_u32    ), NO_WAIT);
+            xQueueReceive(queue2, (void *)&(this->pm25_min_u32), NO_WAIT);
+            xQueueReceive(queue2, (void *)&(this->pm25_max_u32), NO_WAIT);
         }
 
         if (uxQueueSpacesAvailable(queue3))
         {
-            xQueueReceive(queue1, (void *)&(this->o3_ppb     ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ppm     ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ug      ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ppb_min ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ppm_min ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ug_min  ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ppb_max ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ppm_max ), TICK_TO_WAIT);
-            xQueueReceive(queue1, (void *)&(this->o3_ug_max  ), TICK_TO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppb     ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppm     ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ug      ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppb_min ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppm_min ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ug_min  ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppb_max ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ppm_max ), NO_WAIT);
+            xQueueReceive(queue3, (void *)&(this->o3_ug_max  ), NO_WAIT);
         }
         
     }

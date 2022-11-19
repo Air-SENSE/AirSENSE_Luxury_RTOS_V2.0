@@ -10,7 +10,8 @@
  */
 
 #pragma once
-#if (defined(USING_MQTT))
+char espID[10];
+
 
 WiFiUDP ntpUDP;
 WiFiClient espClient;
@@ -20,12 +21,12 @@ NTPClient timeClient(ntpUDP, "de.pool.ntp.org", 3600*7, 60000);
 #define MQTT_SERVER_IP_ADDRESS "188.68.48.86"
 #define MQTT_SERVER_PORT  	1883U
 
-#define ERROR_MQTT_INIT_FAILED		0x51
-#define ERROR_MQTT_POST_DATA_FAILED 0X52
+#define ERROR_MQTT_INIT_FAILED		(0x51)
+#define ERROR_MQTT_POST_DATA_FAILED (0X52)
 
 char topic[32];
-char espID[10];
 
+#if (defined(USING_MQTT))
 
 /**
  * @brief	ham de khoi tao ket noi mqtt

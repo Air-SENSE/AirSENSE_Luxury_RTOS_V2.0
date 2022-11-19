@@ -64,8 +64,8 @@ ERROR_CODE SDcard_readCalibDataFromFile(struct connectionStatus *_connectStatus,
 ERROR_CODE SDcard_saveStringDataToFile(struct connectionStatus *_connectStatus, const char *fileContent_string);
 ERROR_CODE createSensorDataString(char *_sensorDataString, const char *_nameDevice, const char *_dateTimeString, struct sensorData _sensorData_st);
 
-ERROR_CODE SHT_init(TwoWire &wire);
-ERROR_CODE SHT_getData(struct connectionStatus *_connectStatus, const uint16_t temperature_calibInt_u16, const uint16_t humidity_calibInt_u16, float *temperature, float *humidity);
+ERROR_CODE SHT_init(TwoWire &wire, struct connectionStatus *_connectStatus);
+ERROR_CODE SHT_getData(struct connectionStatus *_connectStatus, const uint16_t temperature_calibInt_u16, const uint16_t humidity_calibInt_u16, struct sensorData *_sensorData);
 
 ERROR_CODE TFLP01_init(HardwareSerial& _stream, uint32_t baudRate_u32);
 ERROR_CODE TFLP01_readRawData(uint8_t *dataArray, size_t lenght);
@@ -186,15 +186,14 @@ void getDataFromSensor_Task(void *parameters)
 
 		if (connectionStatus_st.shtSensor == status_et::CONNECTED)
 		{
-			SHT_getData(calibDataTemp_st.temperature_calibInt_u32,
+			SHT_getData(&connectionStatus_st, calibDataTemp_st.temperature_calibInt_u32,
 						calibDataTemp_st.humidity_calibInt_u32,
-						&sensorDataTemp_st.temperature,
-						&sensorDataTemp_st.humidity);
+						&sensorData_st);
 
 			if (uxQueueSpacesAvailable(dataSHTSensorQueue) < (UBaseType_t)2)
 			{
-				xQueueSend(dataSHTSensorQueue, &(sensorDataTemp_st.temperature), TICK_TO_WAIT);
-				xQueueSend(dataSHTSensorQueue, &(sensorDataTemp_st.humidity), TICK_TO_WAIT);
+				xQueueSend(dataSHTSensorQueue, &(sensorDataTemp_st.temperature), NO_WAIT);
+				xQueueSend(dataSHTSensorQueue, &(sensorDataTemp_st.humidity), NO_WAIT);
 			}
 
 		} else {
@@ -207,11 +206,11 @@ void getDataFromSensor_Task(void *parameters)
 			
 			if (uxQueueSpacesAvailable(dataTFLPSensorQueue) < (UBaseType_t)5)
 			{
-				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), TICK_TO_WAIT);
-				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm25_u32), TICK_TO_WAIT);
-				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm10_u32), TICK_TO_WAIT);
-				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), TICK_TO_WAIT);
-				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), TICK_TO_WAIT);
+				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), NO_WAIT);
+				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm25_u32), NO_WAIT);
+				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm10_u32), NO_WAIT);
+				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), NO_WAIT);
+				xQueueSend(dataTFLPSensorQueue, &(sensorDataTemp_st.pm1_u32), NO_WAIT);
 			}
 
 		} else {
@@ -225,15 +224,15 @@ void getDataFromSensor_Task(void *parameters)
 
 			if (uxQueueSpacesAvailable(dataO3Queue) < (UBaseType_t)9)
 			{
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_max), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_max), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_max), TICK_TO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_max), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_max), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_max), NO_WAIT);
 			}
 
 		} else {
@@ -247,15 +246,15 @@ void getDataFromSensor_Task(void *parameters)
 
 			if (uxQueueSpacesAvailable(dataO3Queue) < (UBaseType_t)9)
 			{
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_min), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_max), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_max), TICK_TO_WAIT);
-				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_max), TICK_TO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_min), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppb_max), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ppm_max), NO_WAIT);
+				xQueueSend(dataO3Queue, &(sensorDataTemp_st.o3_ug_max), NO_WAIT);
 			}
 
 		} else {
@@ -279,7 +278,7 @@ void dataManagement_Task(void *parameters)
 		SDcard_saveStringDataToFile(&connectionStatus_st, sensorDataString);
 
 		createMessageMQTTString(messageData, (const char *)espID, timeClient, sensorDataTemp_st);
-		MQTT_postData(messageData.c_str(), &connectionStatus_st, mqttClient);
+		// MQTT_postData(messageData.c_str(), &connectionStatus_st, mqttClient);
 
 		vTaskDelay(((TickType_t) 5000 / portTICK_PERIOD_MS));
 	}
@@ -294,7 +293,7 @@ void setup()
 	WIFI_init();
 	//initAllSensor();
 
-	SHT_init(Wire);
+	SHT_init(Wire, &connectionStatus_st);
 	TFLP01_init(TFLP01_SERIAL_PORT, TFLP01_SERIAL_PORT_BAUDRATE, &connectionStatus_st);
 	DFRobotO3_init();
 	MQ131Sensor_init();
@@ -312,7 +311,7 @@ void setup()
 
 	// dataSensor_u32_Handle = xQueueCreate(11, sizeof(uint32_t));
 	// dataSensor_fl_Handle  = xQueueCreate(5, sizeof(float));
-	dataCalibrateQueue	  = xQueueCreate(7, sizeof(uint32_t));
+	dataCalibrateQueue	= xQueueCreate(7, sizeof(uint32_t));
 
 	dataSHTSensorQueue	= xQueueCreate(2, sizeof(float));
 	dataTFLPSensorQueue	= xQueueCreate(5, sizeof(uint32_t));
@@ -324,11 +323,11 @@ void setup()
 	xTaskCreatePinnedToCore(smartConfigWiFi_Task, "Smart config", STACK_SIZE, NULL, 4, &WIFI_smartConfig_Handle, 0);
 	xTaskCreatePinnedToCore(dataManagement_Task, "Data management", STACK_SIZE, NULL, 4, NULL, 0);
 	xTaskCreatePinnedToCore(getDataFromSensor_Task, "Get sensor data", STACK_SIZE, NULL, 3, NULL, 1);
-}
+};
 
 //==========================     LOOP       ========================
 
 void loop()
 {
-
+	// nothing
 }

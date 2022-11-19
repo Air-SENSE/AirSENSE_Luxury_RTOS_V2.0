@@ -18,11 +18,10 @@
 const char fileNameCalib[] = "calib.txt";			// file chua cac gia tri calib
 char nameFileSaveData[12];							// ten file luu du lieu cua sensor theo tung ngay
 
-
-#define ERROR_SD_CARD_INIT_FAILED 		0x31
-#define ERROR_SD_CARD_READ_FILE_FAILED 	0x32
-#define ERROR_SD_CARD_WRITE_FILE_FAILED 0x33
-#define ERROR_SD_CARD_FILE_NOT_FOUND 	0x34
+#define ERROR_SD_CARD_INIT_FAILED 		(0x31)
+#define ERROR_SD_CARD_READ_FILE_FAILED 	(0x32)
+#define ERROR_SD_CARD_WRITE_FILE_FAILED (0x33)
+#define ERROR_SD_CARD_FILE_NOT_FOUND 	(0x34)
 
 
 /**

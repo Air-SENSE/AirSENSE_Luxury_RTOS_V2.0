@@ -23,9 +23,9 @@
 
 
 #define DEVICE_CONNECTED                ERROR_NONE
-#define ERROR_SENSOR_DISCONNECTED       0xc1
-#define ERROR_SENSOR_ALL_DISCONNECTED   0xc2
-#define ERROR_SENSOR_INIT_FAILED        0xc3
+#define ERROR_SENSOR_DISCONNECTED       (0xc1)
+#define ERROR_SENSOR_ALL_DISCONNECTED   (0xc2)
+#define ERROR_SENSOR_INIT_FAILED        (0xc3)
 
 
 
@@ -34,7 +34,7 @@ struct connectionStatus connectionStatus_st;
 
 ERROR_CODE initAllSensor()
 {
-    if ((SHT_init(Wire) == ERROR_NONE)                                               &&
+    if ((SHT_init(Wire, &connectionStatus_st) == ERROR_NONE)                                               &&
         (TFLP01_init(TFLP01_SERIAL_PORT, TFLP01_SERIAL_PORT_BAUDRATE, &connectionStatus_st) == ERROR_NONE) ||
         (DFRobotO3_init() == ERROR_NONE)                                             &&
         (MQ131Sensor_init() == ERROR_NONE)                                           &&
